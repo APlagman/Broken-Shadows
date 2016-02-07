@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<locdata>
+  <!-- Note, don't put comments within text keys... they will get parsed! -->
+  <!-- Main Menu -->
+  <text id='ui_title'>Tyrais</text>
+  <text id='ui_new_game'>New Game</text>
+  <text id='ui_resume_game'>Resume Game</text>
+  <text id='ui_options'>Options</text>
+  <text id='ui_shutdown'>Exit</text>
+
+  <!-- Pause Menu -->
+  <text id='ui_paused'>Paused</text>
+  <text id='ui_resume'>Resume</text>
+  <text id='ui_quit'>Quit</text>
+
+  <!-- Gameplay UI -->
+
+  <!-- Status Messages -->
+
+  <!-- Error Messages -->
+
+  <!-- Months -->
+  <text id='ui_month_1'>Jan. </text>
+  <text id='ui_month_2'>Feb. </text>
+  <text id='ui_month_3'>Mar. </text>
+  <text id='ui_month_4'>Apr. </text>
+  <text id='ui_month_5'>May  </text>
+  <text id='ui_month_6'>Jun. </text>
+  <text id='ui_month_7'>Jul. </text>
+  <text id='ui_month_8'>Aug. </text>
+  <text id='ui_month_9'>Sep. </text>
+  <text id='ui_month_10'>Oct. </text>
+  <text id='ui_month_11'>Nov. </text>
+  <text id='ui_month_12'>Dec. </text>
+</locdata>
