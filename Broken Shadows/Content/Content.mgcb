@@ -10,6 +10,7 @@
 
 #-------------------------------- References --------------------------------#
 
+/reference:../.../Library/bin/Debug/Library.dll
 
 #---------------------------------- Content ---------------------------------#
 
@@ -121,4 +122,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:TextureFormat=Color
 /build:Player2.png
+
+#begin Levels/Level1 - Copy.xml
+/copy:Levels/Level1 - Copy.xml
 

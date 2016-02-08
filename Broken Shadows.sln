@@ -5,16 +5,30 @@ VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Broken Shadows", "Broken Shadows\Broken Shadows.csproj", "{87F5BBC2-388F-45BE-A91F-63149C56C1EB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Library", "Library\Library.csproj", "{C63884DB-CF03-4CEB-96A2-545EE2C3F567}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
 		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{87F5BBC2-388F-45BE-A91F-63149C56C1EB}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{87F5BBC2-388F-45BE-A91F-63149C56C1EB}.Debug|x86.ActiveCfg = Debug|x86
 		{87F5BBC2-388F-45BE-A91F-63149C56C1EB}.Debug|x86.Build.0 = Debug|x86
+		{87F5BBC2-388F-45BE-A91F-63149C56C1EB}.Release|Any CPU.ActiveCfg = Release|x86
 		{87F5BBC2-388F-45BE-A91F-63149C56C1EB}.Release|x86.ActiveCfg = Release|x86
 		{87F5BBC2-388F-45BE-A91F-63149C56C1EB}.Release|x86.Build.0 = Release|x86
+		{C63884DB-CF03-4CEB-96A2-545EE2C3F567}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C63884DB-CF03-4CEB-96A2-545EE2C3F567}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C63884DB-CF03-4CEB-96A2-545EE2C3F567}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C63884DB-CF03-4CEB-96A2-545EE2C3F567}.Debug|x86.Build.0 = Debug|Any CPU
+		{C63884DB-CF03-4CEB-96A2-545EE2C3F567}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C63884DB-CF03-4CEB-96A2-545EE2C3F567}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C63884DB-CF03-4CEB-96A2-545EE2C3F567}.Release|x86.ActiveCfg = Release|Any CPU
+		{C63884DB-CF03-4CEB-96A2-545EE2C3F567}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -210,7 +210,7 @@ namespace Broken_Shadows
         void SpawnLevel()
         {
             _level = new Level(_game);
-            _level.LoadLevel("Level1.xml");
+            _level.LoadLevel("Level1 - Copy.xml");
             _players.Add(new Objects.Player(_game));
         }
 
