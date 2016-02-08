@@ -10,22 +10,25 @@ namespace Broken_Shadows.Objects
         protected string _selectName;
         protected static Texture2D _selectTexture;
         protected bool _interactable;
-        protected bool _spawnable;
-        protected bool _walkable;
+        protected bool _isSpawn;
+        protected bool _isGoal;
+        protected bool _allowsMovement;
         protected bool _selected;
 
-        public bool CanEnter { get { return _walkable; } }
+        public bool CanEnter { get { return _allowsMovement; } }
         public bool IsInteractable { get { return _interactable; } }
-        public bool IsSpawn { get { return _spawnable; } }
+        public bool IsSpawn { get { return _isSpawn; } }
+        public bool IsGoal { get { return _isGoal; } }
         public bool IsSelected { get { return _selected; } set { _selected = value; } }
         public LinkedList<NeighborTile> Neighbors = new LinkedList<NeighborTile>();
 
-        public Tile(Game game, bool canSpawn = false, string textureName = "Tiles/BlankTile", bool canWalk = false, bool canInteract = false, bool selected = false)
+        public Tile(Game game, string textureName = "Tiles/BlankTile", bool isSpawn = false, bool movementAllowed = false, bool isGoal = false, bool canInteract = false, bool selected = false)
             : base(game)
         {
             _interactable = canInteract;
-            _spawnable = canSpawn;
-            _walkable = canWalk;
+            _allowsMovement = movementAllowed;
+            _isSpawn = isSpawn;        
+            _isGoal = isGoal;
             _selected = selected;
 
             _textureName = textureName;
