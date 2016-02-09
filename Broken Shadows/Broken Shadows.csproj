@@ -60,7 +60,6 @@
     <Compile Include="Graphics\GraphicsManager.cs" />
     <Compile Include="InputManager.cs" />
     <Compile Include="Level.cs" />
-    <Compile Include="LevelData.cs" />
     <Compile Include="Localization.cs" />
     <Compile Include="Objects\CombatStyle.cs" />
     <Compile Include="Objects\GameObject.cs" />
@@ -81,6 +80,9 @@
   <ItemGroup>
     <Reference Include="MonoGame.Framework">
       <HintPath>$(MSBuildProgramFiles32)\MonoGame\v3.0\Assemblies\Windows\MonoGame.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoGame.Framework.Content.Pipeline">
+      <HintPath>.\MonoGame.Framework.Content.Pipeline.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
@@ -110,6 +112,12 @@
       <ProductName>Windows Installer 4.5</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Library\Library.csproj">
+      <Project>{c63884db-cf03-4ceb-96a2-545ee2c3f567}</Project>
+      <Name>Library</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Content.Builder.targets" />

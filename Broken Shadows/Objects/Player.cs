@@ -40,7 +40,7 @@ namespace Broken_Shadows.Objects
         }
     }
 
-    public class Player : Creature
+    public class Player : Entity
     {
         private List<Skill> _levels;
         public List<Skill> SkillLevels { get { return _levels; } protected set { _levels = value; } }
@@ -115,7 +115,7 @@ namespace Broken_Shadows.Objects
             {
                 foreach (NeighborTile neighbor in CurrentTile.Neighbors)
                 {
-                    if (neighbor.Direction == eDirection.West && neighbor.GetTile.CanEnter)
+                    if (neighbor.Direction == eDirection.West && neighbor.GetTile.AllowsMovement)
                         canMove = true;
                 }
             }
@@ -124,7 +124,7 @@ namespace Broken_Shadows.Objects
             {
                 foreach (NeighborTile neighbor in CurrentTile.Neighbors)
                 {
-                    if (neighbor.Direction == eDirection.East && neighbor.GetTile.CanEnter)
+                    if (neighbor.Direction == eDirection.East && neighbor.GetTile.AllowsMovement)
                         canMove = true;
                 }
             }
@@ -133,7 +133,7 @@ namespace Broken_Shadows.Objects
             {
                 foreach (NeighborTile neighbor in CurrentTile.Neighbors)
                 {
-                    if (neighbor.Direction == eDirection.North && neighbor.GetTile.CanEnter)
+                    if (neighbor.Direction == eDirection.North && neighbor.GetTile.AllowsMovement)
                         canMove = true;
                 }
             }
@@ -142,45 +142,73 @@ namespace Broken_Shadows.Objects
             {
                 foreach (NeighborTile neighbor in CurrentTile.Neighbors)
                 {
-                    if (neighbor.Direction == eDirection.South && neighbor.GetTile.CanEnter)
+                    if (neighbor.Direction == eDirection.South && neighbor.GetTile.AllowsMovement)
                         canMove = true;
                 }
             }
             // NW
             if (dir.X == -1 && dir.Y == -1)
             {
+                int check = 0;
                 foreach (NeighborTile neighbor in CurrentTile.Neighbors)
                 {
-                    if (neighbor.Direction == eDirection.NorthWest && neighbor.GetTile.CanEnter)
-                        canMove = true;
+                    if (neighbor.Direction == eDirection.NorthWest && neighbor.GetTile.AllowsMovement)
+                        check++;
+                    if (neighbor.Direction == eDirection.North && neighbor.GetTile.AllowsMovement)
+                        check++;
+                    if (neighbor.Direction == eDirection.West && neighbor.GetTile.AllowsMovement)
+                        check++;
                 }
+                if (check == 3)
+                    canMove = true;
             }
             // NE
             if (dir.X == 1 && dir.Y == -1)
             {
+                int check = 0;
                 foreach (NeighborTile neighbor in CurrentTile.Neighbors)
                 {
-                    if (neighbor.Direction == eDirection.NorthEast && neighbor.GetTile.CanEnter)
-                        canMove = true;
+                    if (neighbor.Direction == eDirection.NorthEast && neighbor.GetTile.AllowsMovement)
+                        check++;
+                    if (neighbor.Direction == eDirection.North && neighbor.GetTile.AllowsMovement)
+                        check++;
+                    if (neighbor.Direction == eDirection.East && neighbor.GetTile.AllowsMovement)
+                        check++;
                 }
+                if (check == 3)
+                    canMove = true;
             }
             // SW
             if (dir.X == -1 && dir.Y == 1)
             {
+                int check = 0;
                 foreach (NeighborTile neighbor in CurrentTile.Neighbors)
                 {
-                    if (neighbor.Direction == eDirection.SouthWest && neighbor.GetTile.CanEnter)
-                        canMove = true;
+                    if (neighbor.Direction == eDirection.SouthWest && neighbor.GetTile.AllowsMovement)
+                        check++;
+                    if (neighbor.Direction == eDirection.South && neighbor.GetTile.AllowsMovement)
+                        check++;
+                    if (neighbor.Direction == eDirection.West && neighbor.GetTile.AllowsMovement)
+                        check++;
                 }
+                if (check == 3)
+                    canMove = true;
             }
             // SE
             if (dir.X == 1 && dir.Y == 1)
             {
+                int check = 0;
                 foreach (NeighborTile neighbor in CurrentTile.Neighbors)
                 {
-                    if (neighbor.Direction == eDirection.SouthEast && neighbor.GetTile.CanEnter)
-                        canMove = true;
+                    if (neighbor.Direction == eDirection.SouthEast && neighbor.GetTile.AllowsMovement)
+                        check++;
+                    if (neighbor.Direction == eDirection.South && neighbor.GetTile.AllowsMovement)
+                        check++;
+                    if (neighbor.Direction == eDirection.East && neighbor.GetTile.AllowsMovement)
+                        check++;
                 }
+                if (check == 3)
+                    canMove = true;
             }
             return canMove;
         }

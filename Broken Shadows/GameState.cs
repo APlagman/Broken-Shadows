@@ -27,7 +27,7 @@ namespace Broken_Shadows
         bool _paused = false;
 
         LinkedList<Objects.GameObject> _gameObjects = new LinkedList<Objects.GameObject>();
-        List<Objects.Creature> _creatures = new List<Objects.Creature>();
+        List<Objects.Entity> _creatures = new List<Objects.Entity>();
         List<Objects.Player> _players = new List<Objects.Player>();
 
         // For Tile / Player overworld movement and selection.
@@ -96,7 +96,7 @@ namespace Broken_Shadows
             foreach (Objects.Player player in _players)
             {
                 player.CurrentTile = _level.SpawnTile;
-                player.OriginPosition = player.Position = new Vector2(player.CurrentTile.OriginPosition.X + (float)Math.Sqrt(GlobalDefines.TILE_SIZE), player.CurrentTile.OriginPosition.Y + (float)Math.Sqrt(GlobalDefines.TILE_SIZE));
+                player.OriginPosition = player.Position = new Vector2(player.CurrentTile.OriginPosition.X + GlobalDefines.PLAYER_OFFSET, player.CurrentTile.OriginPosition.Y + GlobalDefines.PLAYER_OFFSET);
                 Graphics.GraphicsManager.Get().AddPlayerObject(player);
             }
         }
@@ -149,7 +149,7 @@ namespace Broken_Shadows
                 {
                     if (_gridIsMoving)
                     {
-                        player.Position = new Vector2(player.CurrentTile.Position.X + (float)Math.Sqrt(GlobalDefines.TILE_SIZE), player.CurrentTile.Position.Y + (float)Math.Sqrt(GlobalDefines.TILE_SIZE));
+                        player.Position = new Vector2(player.CurrentTile.Position.X + GlobalDefines.PLAYER_OFFSET, player.CurrentTile.Position.Y + GlobalDefines.PLAYER_OFFSET);
                     }
                     if (player.HasLegalNeighbor(_playerDir))
                     {                       
@@ -210,7 +210,7 @@ namespace Broken_Shadows
         void SpawnLevel()
         {
             _level = new Level(_game);
-            _level.LoadLevel("Level1 - Copy.xml");
+            _level.LoadLevel("Levels/Level1");
             _players.Add(new Objects.Player(_game));
         }
 
@@ -280,22 +280,22 @@ namespace Broken_Shadows
                 _gridIsMoving = false;
                 if (binds.ContainsKey(eBindings.Pan_Left))
                 {
-                    _gridPos.X -= GlobalDefines.TILE_STEP_SIZE;
+                    _gridPos.X -= GlobalDefines.GRID_STEP_SIZE;
                     _gridIsMoving = true;
                 }
                 if (binds.ContainsKey(eBindings.Pan_Right))
                 {
-                    _gridPos.X += GlobalDefines.TILE_STEP_SIZE;
+                    _gridPos.X += GlobalDefines.GRID_STEP_SIZE;
                     _gridIsMoving = true;
                 }
                 if (binds.ContainsKey(eBindings.Pan_Up))
                 {
-                    _gridPos.Y -= GlobalDefines.TILE_STEP_SIZE;
+                    _gridPos.Y -= GlobalDefines.GRID_STEP_SIZE;
                     _gridIsMoving = true;
                 }
                 if (binds.ContainsKey(eBindings.Pan_Down))
                 {
-                    _gridPos.Y += GlobalDefines.TILE_STEP_SIZE;
+                    _gridPos.Y += GlobalDefines.GRID_STEP_SIZE;
                     _gridIsMoving = true;
                 }
                 if (binds.ContainsKey(eBindings.Reset_Pan))

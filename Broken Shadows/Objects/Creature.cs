@@ -2,7 +2,7 @@
 
 namespace Broken_Shadows.Objects
 {
-    public class Creature : GameObject
+    public class Entity : GameObject
     {
         protected int _combatLevel;
         protected int _maxHealth;
@@ -17,7 +17,7 @@ namespace Broken_Shadows.Objects
         public int Defence { get { return _defence; } protected set { _defence = value; } }
         public CombatStyle Style { get { return _cbStyle; } protected set { _cbStyle = value; } }
 
-        public Creature(Game game, int level = 1, int hp = 10, int dmg = 1, int def = 0, CombatStyle style = CombatStyle.All)
+        public Entity(Game game, int level = 1, int hp = 10, int dmg = 1, int def = 0, CombatStyle style = CombatStyle.All)
             : base(game)
         {
             CombatLevel = level;

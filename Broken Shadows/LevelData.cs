@@ -7,7 +7,8 @@ namespace Broken_Shadows
 {
     public class LevelData
     {
-        public int[][] layout;
-        public int[][] metadata;        
+        public int Width, Height;
+        public int[] Layout;
+        public int[] Metadata;        
     }
 }

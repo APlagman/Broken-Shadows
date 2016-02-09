@@ -1,4 +1,8 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Text;
+using System.Xml;
+using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate;
+using Microsoft.Xna.Framework;
 
 namespace Broken_Shadows
 {
@@ -13,6 +17,14 @@ namespace Broken_Shadows
 
         protected override void Initialize()
         {
+            /*var testData = new LevelData();
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            using (XmlWriter writer = XmlWriter.Create("test.xml", settings))
+            {
+                IntermediateSerializer.Serialize(writer, testData, null);
+            }*/
+
             GameState.Get().Start(this);
             GameState.Get().SetState(eGameState.OverWorld);
             InputManager.Get().Start();

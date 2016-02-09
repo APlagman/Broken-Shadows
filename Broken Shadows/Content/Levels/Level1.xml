@@ -1,11 +1,20 @@
 <?xml version="1.0"?>
 <XnaContent>
 	<Asset Type="Broken_Shadows.LevelData">
-		<layout>
-			<Item>
-				<Item>1</Item>
-			</Item>
-		</layout>
-		<Metadata></Metadata>
+		<Width>13</Width>
+		<Height>11</Height>
+		<Layout>
+			-1 2 2 2 2 2 2 2 2 2 2 2 2
+		 	-1 2 1 1 1 1 1 1 1 1 1 3 2
+			-1 2 1 1 2 2 2 2 2 2 2 2 2
+			-1 2 1 1 1 1 1 1 1 1 1 2 -1
+			 2 2 2 2 2 2 1 2 2 2 1 2 -1
+			 2 1 1 1 2 5 -1 1 1 1 1 2 -1
+			 2 1 2 1 2 5 -1 2 2 2 2 2 -1
+			 2 1 2 1 2 5 -1 1 1 1 1 2 -1 
+			 2 1 2 1 2 2 2 2 2 2 1 2 -1 
+			 2 4 2 1 1 1 1 1 1 1 1 2 -1 
+			 2 2 2 2 2 2 2 2 2 2 2 2 -1
+		</Layout>
 	</Asset>
 </XnaContent>

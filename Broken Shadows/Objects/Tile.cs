@@ -13,22 +13,25 @@ namespace Broken_Shadows.Objects
         protected bool _isSpawn;
         protected bool _isGoal;
         protected bool _allowsMovement;
+        protected bool _isRigid;
         protected bool _selected;
 
-        public bool CanEnter { get { return _allowsMovement; } }
+        public bool AllowsMovement { get { return _allowsMovement; } }
         public bool IsInteractable { get { return _interactable; } }
         public bool IsSpawn { get { return _isSpawn; } }
         public bool IsGoal { get { return _isGoal; } }
+        public bool IsRigid { get { return _isRigid; } }
         public bool IsSelected { get { return _selected; } set { _selected = value; } }
         public LinkedList<NeighborTile> Neighbors = new LinkedList<NeighborTile>();
 
-        public Tile(Game game, string textureName = "Tiles/BlankTile", bool isSpawn = false, bool movementAllowed = false, bool isGoal = false, bool canInteract = false, bool selected = false)
+        public Tile(Game game, string textureName = "Tiles/BlankTile", bool isSpawn = false, bool movementAllowed = false, bool isGoal = false, bool isRigid = true, bool canInteract = false, bool selected = false)
             : base(game)
         {
             _interactable = canInteract;
             _allowsMovement = movementAllowed;
             _isSpawn = isSpawn;        
             _isGoal = isGoal;
+            _isRigid = isRigid;
             _selected = selected;
 
             _textureName = textureName;

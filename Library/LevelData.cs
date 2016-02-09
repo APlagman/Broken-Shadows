@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Broken_Shadows
 {
     public class LevelData
     {
-        public int[][] layout;
-        public int[][] Metadata;        
+        public int Width = 1;
+        public int Height = 1;
+        public int[] Layout = { 1, 2, 3 };
     }
 }
