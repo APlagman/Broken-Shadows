@@ -132,13 +132,12 @@ namespace Broken_Shadows
         {
             if (!IsPaused)
             {
-                UpdateFrames();
-                System.Diagnostics.Debug.WriteLine(_gridPos.ToString());
+                bool movingTiles = UpdateFrames();
                 foreach (Objects.GameObject o in _gameObjects)
                 {
                     if (o.Enabled)
                     {
-                        if (o.GetType().Name.Equals("Tile"))
+                        if (o.GetType().Name.Equals("Tile") && !movingTiles)
                         {
                             o.Position = o.OriginPosition + _gridPos;
                         }
@@ -171,20 +170,28 @@ namespace Broken_Shadows
         /// Input frames allow a slight delay in order to help with diagonal input before moving the player.
         /// Also refreshes the player's previous move direction.
         /// </summary>
-        private void UpdateFrames()
+        /// <returns>True if any Tiles have been </returns>
+        private bool UpdateFrames()
         {
+            bool tilesHaveMoved = false, checkTiles = false;
             // Input
             if (_inputFramesLeft.X >= 0)
             {
                 _inputFramesLeft.X--;
                 if (_inputFramesLeft.X < 0)
+                {
                     _playerFramesLeft.X = MOVE_FRAMES;
+                    checkTiles = true;
+                }
             }
             if (_inputFramesLeft.Y >= 0)
             {
                 _inputFramesLeft.Y--;
                 if (_inputFramesLeft.Y < 0)
+                {
                     _playerFramesLeft.Y = MOVE_FRAMES;
+                    checkTiles = true;
+                }
             }
 
             // Player movement
@@ -203,6 +210,10 @@ namespace Broken_Shadows
             _playerDir = new Vector2((_playerFramesLeft.X >= 0) ? _inputDir.X : 0, (_playerFramesLeft.Y >= 0) ? _inputDir.Y : 0);
             if (_playerDir != Vector2.Zero)
                 _prevDir = _playerDir;
+            if (checkTiles && _players.First().HasLegalNeighbor(_playerDir))
+                tilesHaveMoved = _level.ShiftTiles(_playerDir);
+
+            return tilesHaveMoved;
         }
         #endregion
 
@@ -300,8 +311,7 @@ namespace Broken_Shadows
                 }
                 if (binds.ContainsKey(eBindings.Reset_Pan))
                 {
-                    _gridPos = Vector2.Zero;
-                    _gridIsMoving = true;
+                    SetupOverWorld();
                 }
                 if (binds.ContainsKey(eBindings.Move_Up))
                 {

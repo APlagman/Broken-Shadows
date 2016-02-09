@@ -19,6 +19,7 @@ namespace Broken_Shadows.Objects
         SouthWest,
         SouthEast
     }
+
     public class NeighborTile
     {
         public Tile GetTile { get; }
