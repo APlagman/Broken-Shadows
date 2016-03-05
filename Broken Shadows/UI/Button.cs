@@ -7,16 +7,17 @@ namespace Broken_Shadows.UI
     public class Button
     {
         public Rectangle _bounds = new Rectangle();
+        Rectangle _boundsHover = new Rectangle();
 
-        public Texture2D _texDefault;
-        public Texture2D _texFocus;
+        Texture2D _texDefault;
+        Texture2D _texFocus;
 
-        public SpriteFont _font;
-        public string _text = "";
-        public Color _colorDefault;
-        public Color _colorFocus;
+        SpriteFont _font;
+        string _text = "";
+        Color _colorDefault;
+        Color _colorFocus;
 
-        public Action OnClick;
+        Action OnClick;
         public void Click()
         {
             if (OnClick != null)
@@ -25,19 +26,11 @@ namespace Broken_Shadows.UI
             }
         }
 
-        private bool _isFocused;
-        public bool HasFocus
-        {
-            set { _isFocused = value; }
-            get { return _isFocused; }
-        }
+        bool _isFocused;
+        bool _enabled = true;
 
-        private bool _enabled = true;
-        public bool Enabled
-        {
-            get { return _enabled; }
-            set { _enabled = value; }
-        }
+        public bool HasFocus { set { _isFocused = value; } get { return _isFocused; } }
+        public bool Enabled { get { return _enabled; } set { _enabled = value; } }
 
         // Constructor for text-only buttons
         public Button(Point Position, string TextKey, SpriteFont Font, Color Default,
@@ -46,12 +39,19 @@ namespace Broken_Shadows.UI
             string Text = Localization.Get().Text(TextKey);
             // Grab the extents of this text so we can align it properly
             Vector2 vTextSize = Font.MeasureString(Text);
+            Vector2 vHoverTextSize = Font.MeasureString("< " + Text + " >");
 
             _bounds.Location = Position;
             _bounds.X -= (int)(vTextSize.X / 2.0f);
             _bounds.Y -= (int)(vTextSize.Y / 2.0f);
             _bounds.Width = (int)vTextSize.X;
             _bounds.Height = (int)vTextSize.Y;
+
+            _boundsHover.Location = Position;
+            _boundsHover.X -= (int)(vHoverTextSize.X / 2.0f);
+            _boundsHover.Y -= (int)(vHoverTextSize.Y / 2.0f);
+            _boundsHover.Width = (int)vHoverTextSize.X;
+            _boundsHover.Height = (int)vHoverTextSize.Y;
 
             _text = Text;
             _font = Font;
@@ -86,7 +86,7 @@ namespace Broken_Shadows.UI
 
                 if (_text != "")
                 {
-                    DrawBatch.DrawString(_font, _text, new Vector2(_bounds.X, _bounds.Y), _colorFocus);
+                    DrawBatch.DrawString(_font, "< " + _text + " >", new Vector2(_boundsHover.X, _boundsHover.Y), _colorFocus);
                 }
             }
             else

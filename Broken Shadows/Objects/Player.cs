@@ -43,13 +43,13 @@ namespace Broken_Shadows.Objects
     public class Player : Entity
     {
         private List<Skill> _levels;
-        public List<Skill> SkillLevels { get { return _levels; } protected set { _levels = value; } }
+        //public List<Skill> SkillLevels { get { return _levels; } protected set { _levels = value; } }
         public Tile CurrentTile { get; set; }
 
         public Player(Game game)
             : base(game)
         {
-            Texture = "Player";
+            Texture = "Entities/Player";
             base.Load();
             _levels = CreateSkills();
             UpdateHealth();

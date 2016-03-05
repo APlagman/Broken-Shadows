@@ -24,13 +24,18 @@ namespace Broken_Shadows.UI
             _title = Localization.Get().Text("ui_title");
 
             _buttons.AddLast(new Button(vPos, "ui_new_game",
-                _buttonFont, Color.DarkBlue,
-                Color.White, NewGame));
+                _buttonFont, Color.White,
+                Color.Purple, NewGame));
 
-            vPos.Y += 150;
-            _buttons.AddLast(new Button(vPos, "ui_exit",
-                _buttonFont, Color.DarkBlue,
-                Color.White, Exit));
+            vPos.Y += 100;
+            _buttons.AddLast(new Button(vPos, "ui_help_title",
+                _buttonFont, Color.White,
+                Color.Purple, Help));
+
+            vPos.Y += 50;
+            _buttons.AddLast(new Button(vPos, "ui_shutdown",
+                _buttonFont, Color.White,
+                Color.Purple, Exit));
         }
 
         public void NewGame()
@@ -41,6 +46,11 @@ namespace Broken_Shadows.UI
 
         public void Options()
         {
+        }
+
+        public void Help()
+        {
+            GameState.Get().ShowHelpMenu();
         }
 
         public void Exit()
@@ -58,7 +68,7 @@ namespace Broken_Shadows.UI
         {
             Vector2 vOffset = Vector2.Zero;
             vOffset.Y = -1.0f * Graphics.GraphicsManager.Get().Height / 4.0f;
-            DrawCenteredString(DrawBatch, _title, _titleFont, Color.DarkBlue, vOffset);
+            DrawCenteredString(DrawBatch, _title, _titleFont, Color.MediumPurple, vOffset);
 
             base.Draw(fDeltaTime, DrawBatch);
         }

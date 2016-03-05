@@ -20,6 +20,8 @@ namespace Broken_Shadows
         Pan_Left,
         Pan_Right,
         Reset_Pan,
+        Toggle_Center_Player,
+        Reset_Level,
         Move_Down,
         Move_Up,
         Move_Left,
@@ -37,6 +39,11 @@ namespace Broken_Shadows
 
         public Keys _key;
         public eBindType _type;
+
+        public override string ToString()
+        {
+            return _key.ToString() + ", " + _type.ToString(); // For debug purposes
+        }
     }
 
     public enum eMouseState
@@ -64,7 +71,9 @@ namespace Broken_Shadows
             _bindings.Add(eBindings.Pan_Left, new BindInfo(Keys.Left, eBindType.Held));
             _bindings.Add(eBindings.Pan_Down, new BindInfo(Keys.Down, eBindType.Held));
             _bindings.Add(eBindings.Pan_Right, new BindInfo(Keys.Right, eBindType.Held));
-            _bindings.Add(eBindings.Reset_Pan, new BindInfo(Keys.R, eBindType.JustPressed));
+            _bindings.Add(eBindings.Reset_Pan, new BindInfo(Keys.Tab, eBindType.JustPressed));
+            _bindings.Add(eBindings.Toggle_Center_Player, new BindInfo(Keys.LeftShift, eBindType.JustPressed));
+            _bindings.Add(eBindings.Reset_Level, new BindInfo(Keys.R, eBindType.JustPressed));
             _bindings.Add(eBindings.Move_Up, new BindInfo(Keys.W, eBindType.Held));
             _bindings.Add(eBindings.Move_Left, new BindInfo(Keys.A, eBindType.Held));
             _bindings.Add(eBindings.Move_Down, new BindInfo(Keys.S, eBindType.Held));
@@ -73,17 +82,12 @@ namespace Broken_Shadows
 
         private SortedList<eBindings, BindInfo> _activeBinds = new SortedList<eBindings, BindInfo>();
 
-        // Mouse Data
-        private MouseState _prevMouse, _curMouse;
-
+        KeyboardState _prevKey, _curKey;
+        MouseState _prevMouse, _curMouse;
         eMouseState _mouseState = eMouseState.Default;
+        Point _mousePos = Point.Zero;
         public eMouseState MouseState { get { return _mouseState; } set { _mouseState = value; } }
-
-        private Point _mousePos = Point.Zero;
         public Point MousePosition { get { return _mousePos; } }
-
-        // Keyboard Data
-        private KeyboardState _prevKey, _curKey;
 
         public void Start()
         {
@@ -131,10 +135,7 @@ namespace Broken_Shadows
                 switch (Type)
                 {
                     case (eBindType.Held):
-                        if ((_prevKey.IsKeyDown(Key) &&
-                            _curKey.IsKeyDown(Key)) ||
-                            (!_prevKey.IsKeyDown(Key) &&
-                            _curKey.IsKeyDown(Key)))
+                        if ( _curKey.IsKeyDown(Key))
                         {
                             _activeBinds.Add(k.Key, k.Value);
                         }
@@ -172,6 +173,11 @@ namespace Broken_Shadows
         {
             UpdateMouse(fDeltaTime);
             UpdateKeyboard(fDeltaTime);
+            /*if (_activeBinds.Count > 0)
+            {
+                foreach (KeyValuePair<eBindings, BindInfo> p in _activeBinds)
+                    System.Diagnostics.Debug.WriteLine(p);
+            }*/
         }
 
         public Point CalculateMousePoint()

@@ -2,12 +2,22 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace Broken_Shadows.Graphics
 {
     public class GraphicsManager : Patterns.Singleton<GraphicsManager>
     {
+        public static Texture2D lightMaskSmall, lightMaskBig;
+        public static Effect lightingEffect;
+        RenderTarget2D lightsTarget;
+        RenderTarget2D mainTarget;
+
+        bool _renderLights;
+        public bool RenderLights { get { return _renderLights; } set { _renderLights = value; } }
+
         GraphicsDeviceManager _graphics;
+        FrameCounter _frameCounter = new FrameCounter();
         Game _game;
         SpriteBatch _spriteBatch;
         Texture2D _blank;
@@ -17,12 +27,14 @@ namespace Broken_Shadows.Graphics
         LinkedList<Objects.GameObject> _objects = new LinkedList<Objects.GameObject>();
         LinkedList<Objects.Player> _playerObjects = new LinkedList<Objects.Player>();
 
-        public bool IsFullScreen
+        public string posString = "";
+
+        private bool IsFullScreen
         {
             get { return _graphics.IsFullScreen; }
             set { _graphics.IsFullScreen = value; }
         }
-        public bool IsVSync
+        private bool IsVSync
         {
             get { return _graphics.SynchronizeWithVerticalRetrace; }
             set { _graphics.SynchronizeWithVerticalRetrace = value; }
@@ -31,10 +43,18 @@ namespace Broken_Shadows.Graphics
         public int Height { get { return _graphics.PreferredBackBufferHeight; } }
         public GraphicsDevice GraphicsDevice { get { return _graphics.GraphicsDevice; } }
 
+        public Utils.MarkupTextEngine MarkupEngine
+        {
+            get; internal set;
+        }
+
         public void Start(Game game)
         {
             _graphics = new GraphicsDeviceManager(game);
             _game = game;
+            IsVSync = GlobalDefines.VSync;
+            _game.TargetElapsedTime = new TimeSpan(0, 0, 0, 0, 1000 / GlobalDefines.FPS);
+            _renderLights = true;
             
             if (!GlobalDefines.IS_FULLSCREEN)
             {
@@ -51,6 +71,14 @@ namespace Broken_Shadows.Graphics
         {
             _spriteBatch = new SpriteBatch(_graphics.GraphicsDevice);
 
+            // Load lighting
+            lightMaskBig = _game.Content.Load<Texture2D>("Shaders//lightmask1");
+            lightMaskSmall = _game.Content.Load<Texture2D>("Shaders//lightmask2");
+            lightingEffect = _game.Content.Load<Effect>("Shaders//lighteffect");
+            var pp = _graphics.GraphicsDevice.PresentationParameters;
+            lightsTarget = new RenderTarget2D(_graphics.GraphicsDevice, pp.BackBufferWidth, pp.BackBufferHeight);
+            mainTarget = new RenderTarget2D(_graphics.GraphicsDevice, pp.BackBufferWidth, pp.BackBufferHeight);
+
             // Load mouse textures
             _mouseTextures[(int)eMouseState.Default] = _game.Content.Load<Texture2D>("UI/Mouse_Default");
 
@@ -60,6 +88,21 @@ namespace Broken_Shadows.Graphics
             // Debug stuff for line drawing
             _blank = new Texture2D(_graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
             _blank.SetData(new[] { Color.White });
+
+            // Setup the font, image, video and condition resolvers for the engine.
+            // The resolvers are simple lambdas that map a string to its corresponding data
+            // e.g. an image resolver maps a string to a Texture2D
+            var fonts = new Dictionary<string, SpriteFont>();
+            Func<string, SpriteFont> fontResolver = f => fonts[f];
+            fonts.Add("Instructions", _game.Content.Load<SpriteFont>("Fonts/FixedText"));
+
+            var buttons = new Dictionary<string, Texture2D>();
+            Func<string, Texture2D> imageResolver = b => buttons[b];
+
+            var conditions = new Dictionary<string, bool>();
+            Func<string, bool> conditionalResolver = c => conditions[c];
+
+            MarkupEngine = new Utils.MarkupTextEngine(fontResolver, imageResolver, conditionalResolver);
         }
 
         public void SetResolutionToCurrent()
@@ -91,11 +134,27 @@ namespace Broken_Shadows.Graphics
 
         public void Draw(float fDeltaTime)
         {
+            // Create a light mask to pass to the pixel shader
+            _graphics.GraphicsDevice.SetRenderTarget(lightsTarget);
             _graphics.GraphicsDevice.Clear(Color.Black);
-            
-            _spriteBatch.Begin();
+            _spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
+            foreach (Objects.GameObject o in _objects)
+            {
+                Objects.Tile t = (Objects.Tile)o;
+                if ((t.IsGoal || t.IsSpawn) && _renderLights)
+                    _spriteBatch.Draw(lightMaskSmall, new Vector2(t.Position.X - lightMaskSmall.Width / 2 + GlobalDefines.TILE_SIZE / 2, t.Position.Y - lightMaskSmall.Height / 2 + GlobalDefines.TILE_SIZE / 2), Color.White);
+            }
+            foreach (Objects.Player p in _playerObjects)
+            {
+                _spriteBatch.Draw(lightMaskBig, new Vector2(p.Position.X - lightMaskBig.Width / 2 + GlobalDefines.PLAYER_SIZE / 2, p.Position.Y - lightMaskBig.Height / 2 + GlobalDefines.PLAYER_SIZE / 2), Color.White);
+            }
+            _spriteBatch.Draw(lightMaskSmall, new Vector2(Mouse.GetState().Position.X - lightMaskSmall.Width / 2, Mouse.GetState().Position.Y - lightMaskSmall.Height / 2), Color.White);
+            _spriteBatch.End();
 
-            GameState.Get().DrawUI(fDeltaTime, _spriteBatch);
+            // Draw the main scene to the render target
+            _graphics.GraphicsDevice.SetRenderTarget(mainTarget);
+            _graphics.GraphicsDevice.Clear(Color.Black);
+            _spriteBatch.Begin();
 
             foreach (Objects.GameObject o in _objects)
             {
@@ -105,23 +164,53 @@ namespace Broken_Shadows.Graphics
             {
                 p.Draw(_spriteBatch);
             }
+            _spriteBatch.End();
+
+            // Draw the main scene with a pixel
+            _graphics.GraphicsDevice.SetRenderTarget(null);
+            _graphics.GraphicsDevice.Clear(Color.Black);
+            _spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+
+            lightingEffect.Parameters["lightMask"].SetValue(lightsTarget);
+            lightingEffect.CurrentTechnique.Passes[0].Apply();
+            _spriteBatch.Draw(mainTarget, Vector2.Zero, Color.White);
+            _spriteBatch.End();
+
+            DrawOverlay(fDeltaTime);
+            if (!_renderLights) _renderLights = true;
+        }
+
+        private void DrawOverlay(float fDeltaTime)
+        {
+            _spriteBatch.Begin();
+
+            GameState.Get().DrawUI(fDeltaTime, _spriteBatch);
 
             // Draw mouse cursor
             Point MousePos = InputManager.Get().MousePosition;
             Vector2 vMousePos = new Vector2(MousePos.X, MousePos.Y);
             _spriteBatch.Draw(GetMouseTexture(InputManager.Get().MouseState), vMousePos, Color.White);
 
-            // Draw FPS counter
+            // Draw Build / FPS counter
             Vector2 vFPSPos = Vector2.Zero;
             if (DebugDefines.showBuildString)
             {
-                _spriteBatch.DrawString(_fpsFont, "Tyrais (Prototype)", vFPSPos, Color.White);
+                _spriteBatch.DrawString(_fpsFont, "Broken Shadows (Prototype)", vFPSPos, Color.White);
                 vFPSPos.Y += 25.0f;
             }
             if (DebugDefines.showFPS)
             {
-                string sFPS = String.Format("FPS: {0}", (int)(1 / fDeltaTime));
+                _frameCounter.Update(fDeltaTime);
+                string sFPS = String.Format("FPS: {0:F2}", _frameCounter.AverageFramesPerSecond);
                 _spriteBatch.DrawString(_fpsFont, sFPS, vFPSPos, Color.White);
+                vFPSPos.Y += 25.0f;
+            }
+
+            // Draw Positions
+            if (DebugDefines.showGridAndPlayerPositions)
+            {
+                _spriteBatch.DrawString(_fpsFont, posString, vFPSPos, Color.White);
+                vFPSPos.Y += 25.0f;
             }
 
             _spriteBatch.End();
@@ -132,8 +221,7 @@ namespace Broken_Shadows.Graphics
             return _mouseTextures[(int)e];
         }
 
-        public void DrawLine(SpriteBatch batch, float width, Color color,
-            Vector2 point1, Vector2 point2)
+        public void DrawLine(SpriteBatch batch, float width, Color color, Vector2 point1, Vector2 point2)
         {
             float angle = (float)Math.Atan2(point2.Y - point1.Y, point2.X - point1.X);
             float length = Vector2.Distance(point1, point2);

@@ -5,11 +5,11 @@ namespace Broken_Shadows.Objects
 {
     public class GameObject
     {
-        private bool _enabled = true;
-        protected Game _game;
-        protected Texture2D _texture;
-        protected string _textureName;
+        bool _enabled = true;
+        Texture2D _texture;
         Vector2 _position, _origin = Vector2.Zero;
+        protected Game _game;
+        protected string _textureName;
 
         public Vector2 Position { get { return _position; } set { _position = value; } }   
         public Vector2 OriginPosition { get { return _origin; } set { _origin = value; } }

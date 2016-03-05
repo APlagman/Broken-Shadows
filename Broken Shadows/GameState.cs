@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -17,14 +16,14 @@ namespace Broken_Shadows
 
     public class GameState : Patterns.Singleton<GameState>
     {
-        private static int MOVE_FRAMES = GlobalDefines.MOVEMENT_FRAMES;
-        private static int DELAY_FRAMES = GlobalDefines.INPUT_DELAY_FRAMES;
+        static int MOVE_FRAMES = GlobalDefines.MOVEMENT_FRAMES;
+        static int DELAY_FRAMES = GlobalDefines.INPUT_DELAY_FRAMES;
 
         Game _game;
         Stack<UI.UIScreen> _UIStack;
-        UI.UIOverWorld _UIOverWorld;
         eGameState _state, _nextState;
-        bool _paused = false;
+        bool _paused;
+        bool _helpViewed;
 
         LinkedList<Objects.GameObject> _gameObjects = new LinkedList<Objects.GameObject>();
         List<Objects.Entity> _creatures = new List<Objects.Entity>();
@@ -32,15 +31,13 @@ namespace Broken_Shadows
 
         // For Tile / Player overworld movement and selection.
         Level _level;
+        int _levelID;
         Objects.Tile _currentTile, _selectedTile;
         Vector2 _gridPos;
         Vector2 _inputDir, _playerDir, _prevDir, _inputFramesLeft, _playerFramesLeft;
-        bool _gridIsMoving = false;
+        bool _gridIsMoving, _centerPlayer;
 
-        public eGameState State { get { return _state; } }
         public bool IsPaused { get { return _paused; } set { _paused = value; } }
-        public Level Level { get { return _level; }  }
-        public Objects.Tile SelectedTile { get { return _selectedTile; } }
 
         #region Setup & State Changes
         public void Start(Game game)
@@ -55,7 +52,7 @@ namespace Broken_Shadows
             _nextState = NewState;
         }
 
-        private void HandleStateChange()
+        void HandleStateChange()
         {
             if (_nextState == _state)
                 return;
@@ -63,29 +60,27 @@ namespace Broken_Shadows
             switch (_nextState)
             {
                 case eGameState.MainMenu:
+                    Graphics.GraphicsManager.Get().posString = "";
                     _UIStack.Clear();
-                    _UIOverWorld = null;
                     _UIStack.Push(new UI.UIMainMenu(_game.Content));
                     ClearGameObjects();
                     break;
                 case eGameState.OverWorld:
                     SetupOverWorld();
+                    if (!_helpViewed) ShowHelpMenu();
                     break;
             }
 
             _state = _nextState;
         }
 
-        public void SetupOverWorld()
+        void SetupOverWorld()
         {
             ClearGameObjects();
             _UIStack.Clear();
-            _UIOverWorld = new UI.UIOverWorld(_game.Content);
-            _UIStack.Push(_UIOverWorld);
+            _UIStack.Push(new UI.UIOverWorld(_game.Content));
 
             _paused = false;
-            _gridPos = Vector2.Zero;
-            _gridIsMoving = false;
             _inputDir = _playerDir = _prevDir = Vector2.Zero;
             _inputFramesLeft = _playerFramesLeft = new Vector2(-1);
 
@@ -99,6 +94,9 @@ namespace Broken_Shadows
                 player.OriginPosition = player.Position = new Vector2(player.CurrentTile.OriginPosition.X + GlobalDefines.PLAYER_OFFSET, player.CurrentTile.OriginPosition.Y + GlobalDefines.PLAYER_OFFSET);
                 Graphics.GraphicsManager.Get().AddPlayerObject(player);
             }
+            _gridPos = new Vector2(GlobalDefines.WINDOW_WIDTH / 2 - GlobalDefines.TILE_SIZE / 2, GlobalDefines.WINDOW_HEIGHT / 2 - GlobalDefines.TILE_SIZE) - _players.First().OriginPosition;
+            _gridIsMoving = true;
+            _centerPlayer = true;
         }
         #endregion
 
@@ -130,38 +128,23 @@ namespace Broken_Shadows
 
         void UpdateOverWorld(float fDeltaTime)
         {
-            if (!IsPaused)
+            if (!_paused)
             {
-                bool movingTiles = UpdateFrames();
-                foreach (Objects.GameObject o in _gameObjects)
+                if (_centerPlayer)
                 {
-                    if (o.Enabled)
-                    {
-                        if (o.GetType().Name.Equals("Tile") && !movingTiles)
-                        {
-                            o.Position = o.OriginPosition + _gridPos;
-                        }
-                        o.Update(fDeltaTime);
-                    }
-                } 
-                foreach (Objects.Player player in _players)
-                {
-                    if (_gridIsMoving)
-                    {
-                        player.Position = new Vector2(player.CurrentTile.Position.X + GlobalDefines.PLAYER_OFFSET, player.CurrentTile.Position.Y + GlobalDefines.PLAYER_OFFSET);
-                    }
-                    if (player.HasLegalNeighbor(_playerDir))
-                    {                       
-                        player.OriginPosition += _playerDir * GlobalDefines.TILE_STEP_SIZE;
-                        player.Position = player.OriginPosition + _gridPos;
-                        if (_playerFramesLeft.X <= 0 && _playerFramesLeft.Y <= 0)
-                            player.CurrentTile = _level.Intersects(player.Position.ToPoint());
-                    }
-                }              
+                    _gridPos = new Vector2(GlobalDefines.WINDOW_WIDTH / 2 - GlobalDefines.TILE_SIZE / 2, GlobalDefines.WINDOW_HEIGHT / 2 - GlobalDefines.TILE_SIZE) - _players.First().OriginPosition;
+                    _gridIsMoving = true;
+                }
+                UpdateFrames();
+                UpdateTiles(fDeltaTime);
+                UpdatePlayers();
 
                 // Use mouse picking to select the appropriate tile.
                 Point point = InputManager.Get().CalculateMousePoint();
                 _currentTile = _level.Intersects(point);
+
+                if (DebugDefines.showGridAndPlayerPositions)
+                    Graphics.GraphicsManager.Get().posString = string.Format("Grid: {0}\nPlayer: {1}", _gridPos, _players.First().Position);
             }
         }
 
@@ -171,9 +154,9 @@ namespace Broken_Shadows
         /// Also refreshes the player's previous move direction.
         /// </summary>
         /// <returns>True if any Tiles have been </returns>
-        private bool UpdateFrames()
+        void UpdateFrames()
         {
-            bool tilesHaveMoved = false, checkTiles = false;
+            bool checkTiles = false;
             // Input
             if (_inputFramesLeft.X >= 0)
             {
@@ -211,16 +194,83 @@ namespace Broken_Shadows
             if (_playerDir != Vector2.Zero)
                 _prevDir = _playerDir;
             if (checkTiles && _players.First().HasLegalNeighbor(_playerDir))
-                tilesHaveMoved = _level.ShiftTiles(_playerDir);
+                _level.ShiftTiles(_playerDir);
+        }
 
-            return tilesHaveMoved;
+        void UpdateTiles(float fDeltaTime)
+        {
+            foreach (Objects.GameObject o in _gameObjects)
+            {
+                if (o.Enabled)
+                {
+                    if (o.GetType().Name.Equals("Tile"))
+                    {
+                        var t = (Objects.Tile)o;
+                        if (_playerDir == Vector2.Zero)
+                            t.IsMoving = false;
+                        if (t.IsMoving)
+                            t.OriginPosition += _playerDir * GlobalDefines.TILE_STEP_SIZE;
+                        t.Position = t.OriginPosition + _gridPos;
+                    }
+                    o.Update(fDeltaTime);
+                }
+            }
+        }
+
+        void UpdatePlayers()
+        {
+
+            foreach (Objects.Player player in _players)
+            {
+                if (_gridIsMoving)
+                {
+                    player.Position = new Vector2(player.CurrentTile.Position.X + GlobalDefines.PLAYER_OFFSET, player.CurrentTile.Position.Y + GlobalDefines.PLAYER_OFFSET);
+                }
+                if (player.HasLegalNeighbor(_playerDir))
+                {
+                    player.OriginPosition += _playerDir * GlobalDefines.TILE_STEP_SIZE;
+                    player.Position = player.OriginPosition + _gridPos;
+                    if (_centerPlayer) // Both OriginPosition and _gridPos have moved, so the player is one step off-center.
+                        player.Position -= _playerDir * GlobalDefines.TILE_STEP_SIZE;
+                    if (_playerFramesLeft.X <= 0 && _playerFramesLeft.Y <= 0)
+                        player.CurrentTile = _level.Intersects(player.OriginPosition.ToPoint());
+                }
+                if (player.CurrentTile.Equals(_level.GoalTile))
+                {
+                    LoadLevel(true);
+                    return;
+                }
+            }
         }
         #endregion
+        
+        void LoadLevel(bool loadNext = false)
+        {
+            ClearGameObjects();
+            _inputDir = _playerDir = _prevDir = Vector2.Zero;
+            _inputFramesLeft = _playerFramesLeft = new Vector2(-1);
+
+            _selectedTile = null;
+            _currentTile = null;
+
+            _level.LoadLevel("Levels/Level" + ((loadNext) ? ++_levelID : _levelID));
+            _players.Add(new Objects.Player(_game));
+            foreach (Objects.Player player in _players)
+            {
+                player.CurrentTile = _level.SpawnTile;
+                player.OriginPosition = player.Position = new Vector2(player.CurrentTile.OriginPosition.X + GlobalDefines.PLAYER_OFFSET, player.CurrentTile.OriginPosition.Y + GlobalDefines.PLAYER_OFFSET);
+                Graphics.GraphicsManager.Get().AddPlayerObject(player);
+            }
+            foreach (Objects.Player player in _players)
+                player.Position = new Vector2(player.CurrentTile.OriginPosition.X + _gridPos.X + GlobalDefines.PLAYER_OFFSET, player.CurrentTile.OriginPosition.Y + _gridPos.Y + GlobalDefines.PLAYER_OFFSET);
+            Graphics.GraphicsManager.Get().RenderLights = false;
+        }
 
         #region Object Creation
         void SpawnLevel()
         {
             _level = new Level(_game);
+            _levelID = 1;
             _level.LoadLevel("Levels/Level1");
             _players.Add(new Objects.Player(_game));
         }
@@ -243,6 +293,17 @@ namespace Broken_Shadows
             }
         }
 
+        public void RemovePlayer(Objects.Player p, bool removeFromList = true)
+        {
+            p.Enabled = false;
+            p.Unload();
+            Graphics.GraphicsManager.Get().RemovePlayerObject(p);
+            if (removeFromList)
+            {
+                _players.Remove(p);
+            }
+        }
+
         protected void ClearGameObjects()
         {
             // Clear out any and all game objects
@@ -251,10 +312,16 @@ namespace Broken_Shadows
                 RemoveGameObject(o, false);
             }
             _gameObjects.Clear();
+            foreach (Objects.Player p in _players)
+            {
+                RemovePlayer(p, false);
+            }
+            _players.Clear();
         }
         #endregion
 
-        public void SetSelected(Objects.Tile t)
+        #region Input
+        void SetSelected(Objects.Tile t)
         {
             if (_selectedTile != null)
             {
@@ -271,7 +338,7 @@ namespace Broken_Shadows
 
         public void MouseClick(Point Position)
         {
-            if (_state == eGameState.OverWorld && !IsPaused)
+            if (_state == eGameState.OverWorld && !_paused)
             {
                 if (_currentTile != _selectedTile)
                 {
@@ -286,7 +353,7 @@ namespace Broken_Shadows
         /// <param name="binds"></param>
         public void KeyboardInput(SortedList<eBindings, BindInfo> binds)
         {
-            if (_state == eGameState.OverWorld && !IsPaused)
+            if (_state == eGameState.OverWorld && !_paused)
             {
                 _gridIsMoving = false;
                 if (binds.ContainsKey(eBindings.Pan_Left))
@@ -311,7 +378,16 @@ namespace Broken_Shadows
                 }
                 if (binds.ContainsKey(eBindings.Reset_Pan))
                 {
-                    SetupOverWorld();
+                    _gridPos = Vector2.Zero;
+                    _gridIsMoving = true;
+                }
+                if (binds.ContainsKey(eBindings.Toggle_Center_Player))
+                {
+                    _centerPlayer = !_centerPlayer;
+                }
+                if (binds.ContainsKey(eBindings.Reset_Level))
+                {
+                    LoadLevel();
                 }
                 if (binds.ContainsKey(eBindings.Move_Up))
                 {
@@ -391,6 +467,7 @@ namespace Broken_Shadows
                 }
             }
         }
+        #endregion
 
         #region UI
         public UI.UIScreen GetCurrentUI()
@@ -417,12 +494,22 @@ namespace Broken_Shadows
         {
             _UIStack.Peek().OnExit();
             _UIStack.Pop();
+
+            if (_paused == true && _state == eGameState.OverWorld)
+                _paused = false;
         }
 
         public void ShowPauseMenu()
         {
-            IsPaused = true;
+            _paused = true;
             _UIStack.Push(new UI.UIPauseMenu(_game.Content));
+        }
+
+        public void ShowHelpMenu()
+        {
+            _helpViewed = true;
+            _paused = true;
+            _UIStack.Push(new UI.UIHelpMenu(_game.Content));
         }
 
         public void Exit()

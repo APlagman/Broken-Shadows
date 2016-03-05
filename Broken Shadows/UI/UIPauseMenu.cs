@@ -25,13 +25,13 @@ namespace Broken_Shadows.UI
             vPos.Y = (int)(Graphics.GraphicsManager.Get().Height / 2.0f);
 
             _buttons.AddLast(new Button(vPos, "ui_resume",
-                _buttonFont, new Color(0, 0, 200),
-                Color.White, Resume));
+                _buttonFont, Color.White,
+                Color.Purple, Resume));
 
             vPos.Y += 50;
             _buttons.AddLast(new Button(vPos, "ui_quit",
-                _buttonFont, new Color(0, 0, 200),
-                Color.White, Quit));
+                _buttonFont, Color.White,
+                Color.Purple, Quit));
 
             //SoundManager.Get().PlaySoundCue("MenuClick");
         }
@@ -57,9 +57,9 @@ namespace Broken_Shadows.UI
         {
             // Draw background
             var g = Graphics.GraphicsManager.Get();
-            Rectangle rect = new Rectangle(g.Width / 2 - 200, g.Height / 2 - 115,
+            Rectangle rect = new Rectangle(g.Width / 2 - 200, g.Height / 2 - 125,
                 400, 250);
-            g.DrawFilled(DrawBatch, rect, Color.Black, 4.0f, Color.DarkBlue);
+            g.DrawFilled(DrawBatch, rect, Color.Black, 4.0f, Color.Purple);
 
             Vector2 vOffset = Vector2.Zero;
             vOffset.Y -= 75;

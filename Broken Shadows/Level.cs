@@ -6,19 +6,20 @@ using Broken_Shadows.Objects;
 
 namespace Broken_Shadows
 {
-    public enum eTileType
-    {
-        Default = 0,
-        Path,
-        Wall,
-        Spawn,
-        Goal,
-        MoveablePath,
-        NUM_TILE_TYPES
-    }
-
     public class Level
     {
+        private enum eTileType
+        {
+            Default = 0,
+            Path,
+            Wall,
+            Spawn,
+            Goal,
+            MoveablePath,
+            MoveablePath2,
+            NUM_TILE_TYPES
+        }
+
         Game _game;
         Tile[,] _Tiles;
         Tile _spawnTile, _goalTile;
@@ -38,7 +39,7 @@ namespace Broken_Shadows
             {
                 if (t != null)
                 {
-                    Rectangle tileRect = new Rectangle(new Point((int)t.Position.X, (int)t.Position.Y), new Point((int)GlobalDefines.TILE_SIZE));
+                    Rectangle tileRect = new Rectangle(new Point((int)t.OriginPosition.X, (int)t.OriginPosition.Y), new Point((int)GlobalDefines.TILE_SIZE));
                     if (pointRect.Intersects(tileRect))
                         selected = t;
                 }
@@ -146,6 +147,9 @@ namespace Broken_Shadows
                     break;
                 case (eTileType.MoveablePath):
                     Tile = new Tile(_game, "Tiles/Moveable", false, true, false, false);
+                    break;
+                case (eTileType.MoveablePath2):
+                    Tile = new Tile(_game, "Tiles/Moveable2", false, true, false, false);
                     break;
             }
 
@@ -278,8 +282,9 @@ namespace Broken_Shadows
                     {
                         if (n.Direction == direction) canMove = false;
                     }
-                    if (canMove)
+                    if (canMove && !t.IsMoving)
                     {
+                        t.IsMoving = true;
                         moving.Add(t);
                         System.Diagnostics.Debug.WriteLine(t.OriginPosition);
                     }
@@ -338,7 +343,6 @@ namespace Broken_Shadows
                         if (movingTiles.Contains(_Tiles[r, c]))
                         {
                             Tile temp = _Tiles[r, c];
-                            _Tiles[r, c].OriginPosition = new Vector2(_Tiles[r, c].OriginPosition.X + vDir.X * GlobalDefines.TILE_SIZE, _Tiles[r, c].OriginPosition.Y + vDir.Y * GlobalDefines.TILE_SIZE);
                             _Tiles[r, c] = _Tiles[r + (int)vDir.Y, c + (int)vDir.X];
                             _Tiles[r + (int)vDir.Y, c + (int)vDir.X] = temp;
                             movingTiles.Remove(temp);
@@ -361,7 +365,9 @@ namespace Broken_Shadows
             foreach (Tile t in _Tiles)
             {
                 if (t != null)
+                {
                     t.Neighbors.Clear();
+                }
             }
             AssignNeighbors(_Tiles, _Tiles.GetLength(0), _Tiles.GetLength(1));
         }      

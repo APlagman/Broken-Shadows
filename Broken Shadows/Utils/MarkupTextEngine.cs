@@ -1,4 +1,13 @@
-﻿using System;
+﻿//-----------------------------------------------------------------------------
+// MarkupTextEngine from astroboid:
+// http://astroboid.com/2011/06/markup-text-rendering-in-xna.html
+//
+// This is used to generate all the pretty color-coded text that wraps.
+//
+// Used under the Microsoft Permissive license.
+// See LICENSE.txt for full details.
+//-----------------------------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;

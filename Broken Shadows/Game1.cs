@@ -12,7 +12,10 @@ namespace Broken_Shadows
         {
             Graphics.GraphicsManager.Get().Start(this);
             IsMouseVisible = false;
-            Content.RootDirectory = "Content";      
+            IsFixedTimeStep = true;
+            Content.RootDirectory = "Content";
+
+            Window.Title = "Stay off my lawn!"; 
         }
 
         protected override void Initialize()
@@ -26,7 +29,7 @@ namespace Broken_Shadows
             }*/
 
             GameState.Get().Start(this);
-            GameState.Get().SetState(eGameState.OverWorld);
+            GameState.Get().SetState(eGameState.MainMenu);
             InputManager.Get().Start();
             Localization.Get().Start(GlobalDefines.DEFAULT_LOC_FILE);
             base.Initialize();
@@ -49,7 +52,6 @@ namespace Broken_Shadows
                 InputManager.Get().Update(deltaTime);
                 GameState.Get().Update(deltaTime);
             }
-
             base.Update(gameTime);
         }
 

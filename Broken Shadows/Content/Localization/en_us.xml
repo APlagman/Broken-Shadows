@@ -2,12 +2,24 @@
 <locdata>
   <!-- Note, don't put comments within text keys... they will get parsed! -->
   <!-- Main Menu -->
-  <text id='ui_title'>Tyrais</text>
+  <text id='ui_title'>Broken Shadows</text>
   <text id='ui_new_game'>New Game</text>
   <text id='ui_resume_game'>Resume Game</text>
   <text id='ui_options'>Options</text>
   <text id='ui_shutdown'>Exit</text>
 
+  <!-- Help Menu -->
+  <text id='ui_help_title'>How to Play</text>
+  <text id='ui_help_instructions'>
+    <font face='Instructions' color='#FFFFFF'>
+      Progress through each level, avoiding <font color='#ffa500'>hazards</font> and solving puzzles!<br/><br/>
+      Use <font color='#842DCE'>WASD</font> to move, <font color='#842DCE'>LSHIFT</font> to toggle centering the player, and <font color='#842DCE'>arrow keys</font> to pan the grid.<br/><br/>
+      <font color='#9999FF'>Light blue</font> tiles move when you do.<br/><br/>
+      If you get stuck, press <font color='#C11B17'>R</font>!<br/><br/>
+    </font>
+  </text>
+  <text id='ui_help_back'>Done</text>
+  
   <!-- Pause Menu -->
   <text id='ui_paused'>Paused</text>
   <text id='ui_resume'>Resume</text>
