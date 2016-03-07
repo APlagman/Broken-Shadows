@@ -45,6 +45,7 @@ namespace Broken_Shadows.Objects
         private List<Skill> _levels;
         //public List<Skill> SkillLevels { get { return _levels; } protected set { _levels = value; } }
         public Tile CurrentTile { get; set; }
+        public Light Light { get; set; }
 
         public Player(Game game)
             : base(game)
@@ -54,11 +55,16 @@ namespace Broken_Shadows.Objects
             _levels = CreateSkills();
             UpdateHealth();
             Defence = _levels.Find(s => s.Name == eSkillType.Defence).SkillLevel;
+
+            Load();
+            Light = new Light(game, Color.White, LightType.CONE, _texture, 1f);
         }
 
         public override void Update(float fDeltaTime)
         {
             UpdateCombatLevel();
+            if (Light != null)
+                Light.UpdatePosition(new Vector2(Position.X, Position.Y));
             
             base.Update(fDeltaTime);
         }

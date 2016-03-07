@@ -8,8 +8,17 @@ namespace Broken_Shadows.Graphics
 {
     public class GraphicsManager : Patterns.Singleton<GraphicsManager>
     {
-        public static Texture2D lightMaskSmall, lightMaskBig;
-        public static Effect lightingEffect;
+        static readonly float MOUSE_LIGHT_SCALE = 1f;
+        static readonly Color MOUSE_LIGHT_COLOR = Color.White;
+
+        Color LevelColor;
+
+        Texture2D spotLightMask;
+        Texture2D squareLightMask;
+        Effect lightEffect;
+        Effect combineEffect;
+        Effect blurEffect;
+        Effect lightingEffect;
         RenderTarget2D lightsTarget;
         RenderTarget2D mainTarget;
 
@@ -26,19 +35,12 @@ namespace Broken_Shadows.Graphics
 
         LinkedList<Objects.GameObject> _objects = new LinkedList<Objects.GameObject>();
         LinkedList<Objects.Player> _playerObjects = new LinkedList<Objects.Player>();
+        LinkedList<Objects.Light> _lightObjects = new LinkedList<Objects.Light>();
 
-        public string posString = "";
+        public string posString = ""; // For Debug
 
-        private bool IsFullScreen
-        {
-            get { return _graphics.IsFullScreen; }
-            set { _graphics.IsFullScreen = value; }
-        }
-        private bool IsVSync
-        {
-            get { return _graphics.SynchronizeWithVerticalRetrace; }
-            set { _graphics.SynchronizeWithVerticalRetrace = value; }
-        }
+        private bool IsFullScreen { get { return _graphics.IsFullScreen; } set { _graphics.IsFullScreen = value; } }
+        private bool IsVSync { get { return _graphics.SynchronizeWithVerticalRetrace; } set { _graphics.SynchronizeWithVerticalRetrace = value; } }
         public int Width { get { return _graphics.PreferredBackBufferWidth; } }
         public int Height { get { return _graphics.PreferredBackBufferHeight; } }
         public GraphicsDevice GraphicsDevice { get { return _graphics.GraphicsDevice; } }
@@ -72,8 +74,8 @@ namespace Broken_Shadows.Graphics
             _spriteBatch = new SpriteBatch(_graphics.GraphicsDevice);
 
             // Load lighting
-            lightMaskBig = _game.Content.Load<Texture2D>("Shaders//lightmask1");
-            lightMaskSmall = _game.Content.Load<Texture2D>("Shaders//lightmask2");
+            spotLightMask = _game.Content.Load<Texture2D>("Shaders//spotlightmask");
+            squareLightMask = _game.Content.Load<Texture2D>("Shaders//squarelightmask");
             lightingEffect = _game.Content.Load<Effect>("Shaders//lighteffect");
             var pp = _graphics.GraphicsDevice.PresentationParameters;
             lightsTarget = new RenderTarget2D(_graphics.GraphicsDevice, pp.BackBufferWidth, pp.BackBufferHeight);
@@ -138,17 +140,12 @@ namespace Broken_Shadows.Graphics
             _graphics.GraphicsDevice.SetRenderTarget(lightsTarget);
             _graphics.GraphicsDevice.Clear(Color.Black);
             _spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive);
-            foreach (Objects.GameObject o in _objects)
+            _spriteBatch.Draw(squareLightMask, Vector2.Zero, null, LevelColor, 0f, Vector2.Zero, GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width / squareLightMask.Width, SpriteEffects.None, 0f);
+            foreach (Objects.Light l in _lightObjects)
             {
-                Objects.Tile t = (Objects.Tile)o;
-                if ((t.IsGoal || t.IsSpawn) && _renderLights)
-                    _spriteBatch.Draw(lightMaskSmall, new Vector2(t.Position.X - lightMaskSmall.Width / 2 + GlobalDefines.TILE_SIZE / 2, t.Position.Y - lightMaskSmall.Height / 2 + GlobalDefines.TILE_SIZE / 2), Color.White);
+                if (_renderLights) l.Draw(_spriteBatch);
             }
-            foreach (Objects.Player p in _playerObjects)
-            {
-                _spriteBatch.Draw(lightMaskBig, new Vector2(p.Position.X - lightMaskBig.Width / 2 + GlobalDefines.PLAYER_SIZE / 2, p.Position.Y - lightMaskBig.Height / 2 + GlobalDefines.PLAYER_SIZE / 2), Color.White);
-            }
-            _spriteBatch.Draw(lightMaskSmall, new Vector2(Mouse.GetState().Position.X - lightMaskSmall.Width / 2, Mouse.GetState().Position.Y - lightMaskSmall.Height / 2), Color.White);
+            _spriteBatch.Draw(spotLightMask, new Vector2(Mouse.GetState().Position.X - spotLightMask.Width / 2, Mouse.GetState().Position.Y - spotLightMask.Height / 2), null, MOUSE_LIGHT_COLOR, 0f, Vector2.Zero, MOUSE_LIGHT_SCALE, SpriteEffects.None, 0f);
             _spriteBatch.End();
 
             // Draw the main scene to the render target
@@ -267,10 +264,35 @@ namespace Broken_Shadows.Graphics
             _playerObjects.Remove(p);
         }
 
+        public void AddLightObject(Objects.Light l)
+        {
+            _lightObjects.AddLast(l);
+        }
+
+        public void RemoveLightObject(Objects.Light l)
+        {
+            _lightObjects.Remove(l);
+        }
+
+        public void ClearLightObjects()
+        {
+            _lightObjects.Clear();
+        }
+
         public void ClearAllObjects()
         {
             _objects.Clear();
             _playerObjects.Clear();
+        }
+
+        public void ChangeColor(Color newColor)
+        {
+            LevelColor = newColor;
+        }
+
+        public void ChangeColor(byte addBrightness)
+        {
+            LevelColor.A += addBrightness;
         }
     }
 }

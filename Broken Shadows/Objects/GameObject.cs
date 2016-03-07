@@ -6,8 +6,8 @@ namespace Broken_Shadows.Objects
     public class GameObject
     {
         bool _enabled = true;
-        Texture2D _texture;
-        Vector2 _position, _origin = Vector2.Zero;
+        protected Texture2D _texture;
+        protected Vector2 _position, _origin = Vector2.Zero;
         protected Game _game;
         protected string _textureName;
 
@@ -16,10 +16,10 @@ namespace Broken_Shadows.Objects
         public bool Enabled { get { return _enabled; } set { _enabled = value; } }
         public string Texture { set { _textureName = value; } }
 
-        public GameObject(Game game, int xPos = 0, int yPos = 0)
+        public GameObject(Game game)
         {
             _game = game;
-            OriginPosition = Position = new Vector2(xPos, yPos);
+            OriginPosition = Position = new Vector2(0, 0);
         }
 
         public virtual void Load()

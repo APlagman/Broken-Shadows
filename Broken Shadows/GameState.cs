@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -76,24 +77,14 @@ namespace Broken_Shadows
 
         void SetupOverWorld()
         {
-            ClearGameObjects();
             _UIStack.Clear();
             _UIStack.Push(new UI.UIOverWorld(_game.Content));
 
             _paused = false;
-            _inputDir = _playerDir = _prevDir = Vector2.Zero;
-            _inputFramesLeft = _playerFramesLeft = new Vector2(-1);
+            _level = new Level(_game);
+            _levelID = 1;
+            LoadLevel();
 
-            _selectedTile = null;
-            _currentTile = null;
-
-            SpawnLevel();
-            foreach (Objects.Player player in _players)
-            {
-                player.CurrentTile = _level.SpawnTile;
-                player.OriginPosition = player.Position = new Vector2(player.CurrentTile.OriginPosition.X + GlobalDefines.PLAYER_OFFSET, player.CurrentTile.OriginPosition.Y + GlobalDefines.PLAYER_OFFSET);
-                Graphics.GraphicsManager.Get().AddPlayerObject(player);
-            }
             _gridPos = new Vector2(GlobalDefines.WINDOW_WIDTH / 2 - GlobalDefines.TILE_SIZE / 2, GlobalDefines.WINDOW_HEIGHT / 2 - GlobalDefines.TILE_SIZE) - _players.First().OriginPosition;
             _gridIsMoving = true;
             _centerPlayer = true;
@@ -137,7 +128,7 @@ namespace Broken_Shadows
                 }
                 UpdateFrames();
                 UpdateTiles(fDeltaTime);
-                UpdatePlayers();
+                UpdatePlayers(fDeltaTime);
 
                 // Use mouse picking to select the appropriate tile.
                 Point point = InputManager.Get().CalculateMousePoint();
@@ -217,14 +208,17 @@ namespace Broken_Shadows
             }
         }
 
-        void UpdatePlayers()
+        void UpdatePlayers(float fDeltaTime)
         {
-
             foreach (Objects.Player player in _players)
             {
                 if (_gridIsMoving)
                 {
                     player.Position = new Vector2(player.CurrentTile.Position.X + GlobalDefines.PLAYER_OFFSET, player.CurrentTile.Position.Y + GlobalDefines.PLAYER_OFFSET);
+                }
+                if (_playerDir != Vector2.Zero)
+                {
+                    player.Light.Rotation = CalcAngle(_playerDir);
                 }
                 if (player.HasLegalNeighbor(_playerDir))
                 {
@@ -240,6 +234,7 @@ namespace Broken_Shadows
                     LoadLevel(true);
                     return;
                 }
+                player.Update(fDeltaTime);
             }
         }
         #endregion
@@ -254,26 +249,21 @@ namespace Broken_Shadows
             _currentTile = null;
 
             _level.LoadLevel("Levels/Level" + ((loadNext) ? ++_levelID : _levelID));
+            Graphics.GraphicsManager.Get().ChangeColor(_level.LevelColor);
+
             _players.Add(new Objects.Player(_game));
             foreach (Objects.Player player in _players)
             {
                 player.CurrentTile = _level.SpawnTile;
                 player.OriginPosition = player.Position = new Vector2(player.CurrentTile.OriginPosition.X + GlobalDefines.PLAYER_OFFSET, player.CurrentTile.OriginPosition.Y + GlobalDefines.PLAYER_OFFSET);
-                Graphics.GraphicsManager.Get().AddPlayerObject(player);
-            }
-            foreach (Objects.Player player in _players)
                 player.Position = new Vector2(player.CurrentTile.OriginPosition.X + _gridPos.X + GlobalDefines.PLAYER_OFFSET, player.CurrentTile.OriginPosition.Y + _gridPos.Y + GlobalDefines.PLAYER_OFFSET);
+                Graphics.GraphicsManager.Get().AddPlayerObject(player);
+                Graphics.GraphicsManager.Get().AddLightObject(player.Light);
+            }
             Graphics.GraphicsManager.Get().RenderLights = false;
         }
 
         #region Object Creation
-        void SpawnLevel()
-        {
-            _level = new Level(_game);
-            _levelID = 1;
-            _level.LoadLevel("Levels/Level1");
-            _players.Add(new Objects.Player(_game));
-        }
 
         public void SpawnGameObject(Objects.GameObject o)
         {
@@ -306,6 +296,7 @@ namespace Broken_Shadows
 
         protected void ClearGameObjects()
         {
+            Graphics.GraphicsManager.Get().ClearLightObjects();
             // Clear out any and all game objects
             foreach (Objects.GameObject o in _gameObjects)
             {
@@ -517,5 +508,25 @@ namespace Broken_Shadows
             _game.Exit();
         }
         #endregion UI
+
+        private float CalcAngle(Vector2 dir)
+        {
+            if (dir.X == 1 && dir.Y == 1)
+                return 0f;
+            if (dir.X == 1 && dir.Y == 0)
+                return -(float)Math.PI / 4;
+            if (dir.X == 1 && dir.Y == -1)
+                return -(float)Math.PI / 2;
+            if (dir.X == 0 && dir.Y == 1)
+                return (float)Math.PI / 4;
+            if (dir.X == 0 && dir.Y == -1)
+                return -3 * (float)Math.PI / 4;
+            if (dir.X == -1 && dir.Y == 1)
+                return (float)Math.PI / 2;
+            if (dir.X == -1 && dir.Y == 0)
+                return 3 * (float)Math.PI / 4;
+
+            return (float)Math.PI;
+        }
     }
 }

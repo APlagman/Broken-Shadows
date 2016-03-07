@@ -25,6 +25,7 @@ namespace Broken_Shadows
         Tile _spawnTile, _goalTile;
         public Tile SpawnTile { get { return _spawnTile; } }
         public Tile GoalTile { get { return _goalTile; } }
+        public Color LevelColor;
 
         public Level(Game game)
         {
@@ -56,6 +57,7 @@ namespace Broken_Shadows
         {
             _Tiles = null;
             LevelData lData = _game.Content.Load<LevelData>(levelName);
+            LevelColor = new Color(lData.RGBA[0], lData.RGBA[1], lData.RGBA[2], lData.RGBA[3]);
             int height = lData.Height;
             int width = lData.Width;
             int[,] TileData = TranslateTo2D(lData.Layout, height, width);
@@ -157,6 +159,8 @@ namespace Broken_Shadows
             {
                 Tile.OriginPosition = vPos;
                 GameState.Get().SpawnGameObject(Tile);
+                if (Tile.Light != null)
+                    Graphics.GraphicsManager.Get().AddLightObject(Tile.Light);
             }
 
             return Tile;

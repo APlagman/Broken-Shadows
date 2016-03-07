@@ -171,7 +171,7 @@
 /processorParam:DebugMode=Auto
 /build:Shaders/lighteffect.fx
 
-#begin Shaders/lightmask.png
+#begin Shaders/spotlightmask.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -180,9 +180,9 @@
 /processorParam:PremultiplyAlpha=True
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:TextureFormat=Color
-/build:Shaders/lightmask.png
+/build:Shaders/spotlightmask.png
 
-#begin Shaders/lightmask1.png
+#begin Shaders/squarelightmask.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -191,9 +191,9 @@
 /processorParam:PremultiplyAlpha=True
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:TextureFormat=Color
-/build:Shaders/lightmask1.png
+/build:Shaders/squarelightmask.png
 
-#begin Shaders/lightmask2.png
+#begin Shaders/conelightmask.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -202,5 +202,5 @@
 /processorParam:PremultiplyAlpha=True
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:TextureFormat=Color
-/build:Shaders/lightmask2.png
+/build:Shaders/conelightmask.png
 

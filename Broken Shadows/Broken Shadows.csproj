@@ -65,6 +65,7 @@
     <Compile Include="Objects\CombatStyle.cs" />
     <Compile Include="Objects\GameObject.cs" />
     <Compile Include="Objects\Creature.cs" />
+    <Compile Include="Objects\Light.cs" />
     <Compile Include="Objects\NeighborTile.cs" />
     <Compile Include="Objects\Player.cs" />
     <Compile Include="Objects\Tile.cs" />

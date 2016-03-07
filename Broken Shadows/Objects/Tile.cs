@@ -25,6 +25,7 @@ namespace Broken_Shadows.Objects
         public bool IsMoving { get { return _isMoving; } set { _isMoving = value; } }
         public bool IsSelected { get { return _selected; } set { _selected = value; } }
         public LinkedList<NeighborTile> Neighbors = new LinkedList<NeighborTile>();
+        public Light Light { get; set; }
 
         public Tile(Game game, string textureName = "Tiles/BlankTile", bool isSpawn = false, bool movementAllowed = false, bool isGoal = false, bool isRigid = true, bool canInteract = false, bool selected = false)
             : base(game)
@@ -39,6 +40,17 @@ namespace Broken_Shadows.Objects
 
             _textureName = textureName;
             _selectName = "Tiles/Highlight";
+
+            Load();
+            if (isSpawn || isGoal)
+                Light = new Light(game, Color.White, LightType.SPOTLIGHT, _texture);
+        }
+
+        public override void Update(float fDeltaTime)
+        {
+            if (Light != null)
+                Light.UpdatePosition(Position);
+            base.Update(fDeltaTime);
         }
 
         public override void Draw(SpriteBatch batch)
