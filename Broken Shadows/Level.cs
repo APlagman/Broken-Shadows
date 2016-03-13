@@ -8,7 +8,7 @@ namespace Broken_Shadows
 {
     public class Level
     {
-        private enum eTileType
+        private enum TileType
         {
             Default = 0,
             Path,
@@ -20,27 +20,27 @@ namespace Broken_Shadows
             NUM_TILE_TYPES
         }
 
-        Game _game;
-        Tile[,] _Tiles;
-        Tile _spawnTile, _goalTile;
-        public Tile SpawnTile { get { return _spawnTile; } }
-        public Tile GoalTile { get { return _goalTile; } }
+        private Game game;
+        private Tile[,] Tiles;
+        private Tile spawnTile, goalTile;
+        public Tile SpawnTile { get { return spawnTile; } }
+        public Tile GoalTile { get { return goalTile; } }
         public Color LevelColor;
 
         public Level(Game game)
         {
-            _game = game;
+            this.game = game;
         }
 
         public Tile Intersects(Point point)
         {
             Tile selected = null;
             Rectangle pointRect = new Rectangle(point, new Point(1));
-            foreach (Tile t in _Tiles)
+            foreach (Tile t in Tiles)
             {
                 if (t != null)
                 {
-                    Rectangle tileRect = new Rectangle(new Point((int)t.OriginPosition.X, (int)t.OriginPosition.Y), new Point((int)GlobalDefines.TILE_SIZE));
+                    Rectangle tileRect = new Rectangle(new Point((int)t.Pose.Position.X - t.Texture.Width / 2, (int)t.Pose.Position.Y - t.Texture.Height / 2), new Point((int)GlobalDefines.TileSize));
                     if (pointRect.Intersects(tileRect))
                         selected = t;
                 }
@@ -55,17 +55,17 @@ namespace Broken_Shadows
         /// <param name="levelName">String representing the name of the level file to load.</param>
         public virtual void LoadLevel(string levelName)
         {
-            _Tiles = null;
-            LevelData lData = _game.Content.Load<LevelData>(levelName);
+            Tiles = null;
+            LevelData lData = game.Content.Load<LevelData>(levelName);
             LevelColor = new Color(lData.RGBA[0], lData.RGBA[1], lData.RGBA[2], lData.RGBA[3]);
             int height = lData.Height;
             int width = lData.Width;
             int[,] TileData = TranslateTo2D(lData.Layout, height, width);
             
-            _Tiles = new Tile[height,width];
+            Tiles = new Tile[height,width];
 
-            FillTiles(TileData, _Tiles, height, width);
-            AssignNeighbors(_Tiles, height, width);
+            FillTiles(TileData, Tiles, height, width);
+            AssignNeighbors(Tiles, height, width);
         }
 
         /// <summary>
@@ -103,14 +103,14 @@ namespace Broken_Shadows
                 {
                     if (TileData[rowCount,colCount] != -1)
                     {
-                        eTileType type = (eTileType)TileData[rowCount,colCount];
-                        float tileHeight = GlobalDefines.TILE_SIZE;
+                        TileType type = (TileType)TileData[rowCount,colCount];
+                        float tileHeight = GlobalDefines.TileSize;
                         Tile t = CreateTile(new Vector2(colCount * tileHeight, rowCount * tileHeight), type);
 
                         if (t.IsSpawn)
-                            _spawnTile = t;
+                            spawnTile = t;
                         if (t.IsGoal)
-                            _goalTile = t;
+                            goalTile = t;
 
                         Tiles[rowCount,colCount] = t;
                     }
@@ -127,40 +127,39 @@ namespace Broken_Shadows
         /// <param name="type">The type of the tile.</param>
         /// <param name="isSpawn">Whether the tile is a spawn.</param>
         /// <returns></returns>
-        private Tile CreateTile(Vector2 vPos, eTileType type = eTileType.Default)
+        private Tile CreateTile(Vector2 vPos, TileType type = TileType.Default)
         {
             Tile Tile = null;
             switch (type)
             {
-                case (eTileType.Default):
-                    Tile = new Tile(_game);
+                case (TileType.Default):
+                    Tile = new Tile(game, new Pose2D(vPos, 0));
                     break;
-                case (eTileType.Path):
-                    Tile = new Tile(_game, "Tiles/Path", false, true);
+                case (TileType.Path):
+                    Tile = new Tile(game, new Pose2D(vPos, 0), "Tiles/Path", false, true);
                     break;
-                case (eTileType.Wall):
-                    Tile = new Tile(_game, "Tiles/Wall");
+                case (TileType.Wall):
+                    Tile = new Tile(game, new Pose2D(vPos, 0), "Tiles/Wall");
                     break;
-                case (eTileType.Spawn):
-                    Tile = new Tile(_game, "Tiles/Spawn", true, true);
+                case (TileType.Spawn):
+                    Tile = new Tile(game, new Pose2D(vPos, 0), "Tiles/Spawn", true, true);
                     break;
-                case (eTileType.Goal):
-                    Tile = new Tile(_game, "Tiles/Goal", false, true, true);
+                case (TileType.Goal):
+                    Tile = new Tile(game, new Pose2D(vPos, 0), "Tiles/Goal", false, true, true);
                     break;
-                case (eTileType.MoveablePath):
-                    Tile = new Tile(_game, "Tiles/Moveable", false, true, false, false);
+                case (TileType.MoveablePath):
+                    Tile = new Tile(game, new Pose2D(vPos, 0), "Tiles/Moveable", false, true, false, false);
                     break;
-                case (eTileType.MoveablePath2):
-                    Tile = new Tile(_game, "Tiles/Moveable2", false, true, false, false);
+                case (TileType.MoveablePath2):
+                    Tile = new Tile(game, new Pose2D(vPos, 0), "Tiles/Moveable2", false, true, false, false);
                     break;
             }
 
             if (Tile != null)
             {
-                Tile.OriginPosition = vPos;
-                GameState.Get().SpawnGameObject(Tile);
+                StateHandler.Get().SpawnGameObject(Tile, !Tile.AllowsMovement);
                 if (Tile.Light != null)
-                    Graphics.GraphicsManager.Get().AddLightObject(Tile.Light);
+                    Graphics.GraphicsManager.Get().AddLight(Tile.Light);
             }
 
             return Tile;
@@ -229,7 +228,7 @@ namespace Broken_Shadows
             bool keepChecking = false;
             do
             {         
-                eDirection direction = GetDirection(vDir);
+                Direction direction = GetDirection(vDir);
                 System.Diagnostics.Debug.WriteLine("Checking tiles to the " + direction);
                 List<Tile> movingTiles = FindMoving(direction);
                 if (movingTiles.Count > 0)
@@ -249,24 +248,24 @@ namespace Broken_Shadows
         /// </summary>
         /// <param name="vDir"></param>
         /// <returns></returns>
-        private eDirection GetDirection(Vector2 vDir)
+        private Direction GetDirection(Vector2 vDir)
         {
             if (vDir.X == 1 && vDir.Y == 0)
-                return eDirection.East;
+                return Direction.East;
             else if (vDir.X == -1 && vDir.Y == 0)
-                return eDirection.West;
+                return Direction.West;
             else if (vDir.X == 0 && vDir.Y == 1)
-                return eDirection.South;
+                return Direction.South;
             else if (vDir.X == 0 && vDir.Y == -1)
-                return eDirection.North;
+                return Direction.North;
             else if (vDir.X == 1 && vDir.Y == -1)
-                return eDirection.NorthEast;
+                return Direction.NorthEast;
             else if (vDir.X == -1 && vDir.Y == -1)
-                return eDirection.NorthWest;
+                return Direction.NorthWest;
             else if (vDir.X == 1 && vDir.Y == 1)
-                return eDirection.SouthEast;
+                return Direction.SouthEast;
             else
-                return eDirection.SouthWest;
+                return Direction.SouthWest;
         }
 
         /// <summary>
@@ -274,10 +273,10 @@ namespace Broken_Shadows
         /// </summary>
         /// <param name="direction"></param>
         /// <returns></returns>
-        private List<Tile> FindMoving(eDirection direction)
+        private List<Tile> FindMoving(Direction direction)
         {
             List<Tile> moving = new List<Tile>();
-            foreach (Tile t in _Tiles)
+            foreach (Tile t in Tiles)
             {
                 if (t != null && !t.IsRigid)
                 {
@@ -304,9 +303,9 @@ namespace Broken_Shadows
         /// </summary>
         /// <param name="direction"></param>
         /// <returns></returns>
-        private bool MoreTilesToMove(eDirection direction)
+        private bool MoreTilesToMove(Direction direction)
         {
-            foreach (Tile t in _Tiles)
+            foreach (Tile t in Tiles)
             {
                 if (t != null && !t.IsRigid)
                 {
@@ -338,17 +337,17 @@ namespace Broken_Shadows
         /// <param name="vDir"></param>
         private void SwapTiles(List<Tile> movingTiles, Vector2 vDir)
         {
-            for (int r = 0; r < _Tiles.Length; r++)
+            for (int r = 0; r < Tiles.Length; r++)
             {
-                for (int c = 0; c < _Tiles.GetLength(1); c++)
+                for (int c = 0; c < Tiles.GetLength(1); c++)
                 {
                     if (movingTiles.Count > 0)
                     {
-                        if (movingTiles.Contains(_Tiles[r, c]))
+                        if (movingTiles.Contains(Tiles[r, c]))
                         {
-                            Tile temp = _Tiles[r, c];
-                            _Tiles[r, c] = _Tiles[r + (int)vDir.Y, c + (int)vDir.X];
-                            _Tiles[r + (int)vDir.Y, c + (int)vDir.X] = temp;
+                            Tile temp = Tiles[r, c];
+                            Tiles[r, c] = Tiles[r + (int)vDir.Y, c + (int)vDir.X];
+                            Tiles[r + (int)vDir.Y, c + (int)vDir.X] = temp;
                             movingTiles.Remove(temp);
                             System.Diagnostics.Debug.WriteLine("Swapping tiles... " + r + "," + c + " and " + (r + (int)vDir.Y) + "," + (c + (int)vDir.X));
                         }
@@ -366,14 +365,14 @@ namespace Broken_Shadows
         /// </summary>
         private void ReassignNeighbors()
         {
-            foreach (Tile t in _Tiles)
+            foreach (Tile t in Tiles)
             {
                 if (t != null)
                 {
                     t.Neighbors.Clear();
                 }
             }
-            AssignNeighbors(_Tiles, _Tiles.GetLength(0), _Tiles.GetLength(1));
+            AssignNeighbors(Tiles, Tiles.GetLength(0), Tiles.GetLength(1));
         }      
     }
 }

@@ -2,10 +2,10 @@
 {
     public class DebugDefines
     {
-        public static bool drawButtonBounds = false;
-        public static bool showFPS = true;
-        public static bool showBuildString = true;
-        public static bool showWindowsMouseCursor = false;
-        public static bool showGridAndPlayerPositions = false;
+        public static bool DrawButtonBounds = false;
+        public static bool ShowFPS = true;
+        public static bool ShowBuildString = true;
+        public static bool ShowWindowsMouseCursor = false;
+        public static bool ShowGridAndPlayerPositions = false;
     }
 }

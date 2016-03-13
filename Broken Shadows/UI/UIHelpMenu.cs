@@ -6,37 +6,37 @@ namespace Broken_Shadows.UI
 {
     public class UIHelpMenu : UIScreen
     {
-        SpriteFont _titleFont;
-        SpriteFont _buttonFont;
-        string _title;
+        private SpriteFont titleFont;
+        private SpriteFont buttonFont;
+        private string title;
 
-        Utils.CompiledMarkup _instructions;
+        Utils.CompiledMarkup instructions;
 
         public UIHelpMenu(ContentManager Content) :
             base(Content)
         {
-            _titleFont = _content.Load<SpriteFont>("Fonts/QuartzTitle");
-            _buttonFont = _content.Load<SpriteFont>("Fonts/QuartzButton");
-            _title = Localization.Get().Text("ui_help_title");
+            titleFont = content.Load<SpriteFont>("Fonts/QuartzTitle");
+            buttonFont = content.Load<SpriteFont>("Fonts/QuartzButton");
+            title = Localization.Get().Text("ui_help_title");
 
-            _canExit = true;
+            canExit = true;
 
             // Create buttons
             Point vPos = new Point();
             vPos.X = (int)(Graphics.GraphicsManager.Get().Width / 2.0f);
             vPos.Y = (int)(Graphics.GraphicsManager.Get().Height - 100);
             
-            _buttons.AddLast(new Button(vPos, "ui_help_back",
-                _buttonFont, Color.White,
+            buttons.AddLast(new Button(vPos, "ui_help_back",
+                buttonFont, Color.White,
                 Color.Purple, Back));
 
-            _instructions = Graphics.GraphicsManager.Get().MarkupEngine.Compile(
+            instructions = Graphics.GraphicsManager.Get().MarkupEngine.Compile(
                 Localization.Get().Text("ui_help_instructions"), Graphics.GraphicsManager.Get().Width / 1.5f);
         }
 
         public void Back()
         {
-            GameState.Get().PopUI();
+            StateHandler.Get().PopUI();
             //SoundManager.Get().PlaySoundCue("MenuClick");
         }
 
@@ -46,12 +46,12 @@ namespace Broken_Shadows.UI
             base.OnExit();
         }
 
-        public override void Update(float fDeltaTime)
+        public override void Update(float deltaTime)
         {
-            base.Update(fDeltaTime);
+            base.Update(deltaTime);
         }
 
-        public override void Draw(float fDeltaTime, SpriteBatch DrawBatch)
+        public override void Draw(float deltaTime, SpriteBatch DrawBatch)
         {
             // Draw background
             var g = Graphics.GraphicsManager.Get();
@@ -61,13 +61,13 @@ namespace Broken_Shadows.UI
             // Title
             Vector2 vOffset = Vector2.Zero;
             vOffset.Y = -1.0f * Graphics.GraphicsManager.Get().Height / 2.5f;
-            DrawCenteredString(DrawBatch, _title, _titleFont, Color.White, vOffset);
+            DrawCenteredString(DrawBatch, title, titleFont, Color.White, vOffset);
 
-            vOffset.X = Graphics.GraphicsManager.Get().Width / 2.0f - _instructions.Size.X / 2.0f;
-            vOffset.Y = Graphics.GraphicsManager.Get().Height / 2.0f - _instructions.Size.Y / 2.0f;
-            _instructions.Draw(DrawBatch, vOffset);
+            vOffset.X = Graphics.GraphicsManager.Get().Width / 2.0f - instructions.Size.X / 2.0f;
+            vOffset.Y = Graphics.GraphicsManager.Get().Height / 2.0f - instructions.Size.Y / 2.0f;
+            instructions.Draw(DrawBatch, vOffset);
 
-            base.Draw(fDeltaTime, DrawBatch);
+            base.Draw(deltaTime, DrawBatch);
         }
     }
 }

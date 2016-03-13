@@ -1,14 +1,9 @@
 ﻿/**
 * Used for checking legal player movement - contains a tile object and a direction enum.
 */
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace Broken_Shadows.Objects
 {
-    public enum eDirection
+    public enum Direction
     {
         North = 0,
         South,
@@ -23,8 +18,8 @@ namespace Broken_Shadows.Objects
     public class NeighborTile
     {
         public Tile GetTile { get; }
-        public eDirection Direction { get; }
-        public NeighborTile(Tile tile, eDirection direction)
+        public Direction Direction { get; }
+        public NeighborTile(Tile tile, Direction direction)
         {
             GetTile = tile;
             Direction = direction;

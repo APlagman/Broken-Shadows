@@ -6,31 +6,31 @@ namespace Broken_Shadows.UI
 {
     public class UIPauseMenu : UIScreen
     {
-        SpriteFont _titleFont;
-        SpriteFont _buttonFont;
-        string _pausedText;
+        private SpriteFont titleFont;
+        private SpriteFont buttonFont;
+        private string pausedText;
 
         public UIPauseMenu(ContentManager Content) :
             base(Content)
         {
-            _canExit = true;
+            canExit = true;
 
-            _titleFont = _content.Load<SpriteFont>("Fonts/FixedTitle");
-            _buttonFont = _content.Load<SpriteFont>("Fonts/FixedButton");
+            titleFont = content.Load<SpriteFont>("Fonts/FixedTitle");
+            buttonFont = content.Load<SpriteFont>("Fonts/FixedButton");
 
-            _pausedText = Localization.Get().Text("ui_paused");
+            pausedText = Localization.Get().Text("ui_paused");
             // Create buttons
             Point vPos = new Point();
             vPos.X = (int)(Graphics.GraphicsManager.Get().Width / 2.0f);
             vPos.Y = (int)(Graphics.GraphicsManager.Get().Height / 2.0f);
 
-            _buttons.AddLast(new Button(vPos, "ui_resume",
-                _buttonFont, Color.White,
+            buttons.AddLast(new Button(vPos, "ui_resume",
+                buttonFont, Color.White,
                 Color.Purple, Resume));
 
             vPos.Y += 50;
-            _buttons.AddLast(new Button(vPos, "ui_quit",
-                _buttonFont, Color.White,
+            buttons.AddLast(new Button(vPos, "ui_quit",
+                buttonFont, Color.White,
                 Color.Purple, Quit));
 
             //SoundManager.Get().PlaySoundCue("MenuClick");
@@ -38,22 +38,22 @@ namespace Broken_Shadows.UI
 
         public void Resume()
         {
-            GameState.Get().PopUI();
+            StateHandler.Get().PopUI();
             //SoundManager.Get().PlaySoundCue("MenuClick");
         }
 
         public void Quit()
         {
-            GameState.Get().SetState(eGameState.MainMenu);
+            StateHandler.Get().SetState(GameState.MainMenu);
             //SoundManager.Get().PlaySoundCue("MenuClick");
         }
 
-        public override void Update(float fDeltaTime)
+        public override void Update(float deltaTime)
         {
-            base.Update(fDeltaTime);
+            base.Update(deltaTime);
         }
 
-        public override void Draw(float fDeltaTime, SpriteBatch DrawBatch)
+        public override void Draw(float deltaTime, SpriteBatch DrawBatch)
         {
             // Draw background
             var g = Graphics.GraphicsManager.Get();
@@ -63,14 +63,14 @@ namespace Broken_Shadows.UI
 
             Vector2 vOffset = Vector2.Zero;
             vOffset.Y -= 75;
-            DrawCenteredString(DrawBatch, _pausedText, _titleFont, Color.White, vOffset);
+            DrawCenteredString(DrawBatch, pausedText, titleFont, Color.White, vOffset);
 
-            base.Draw(fDeltaTime, DrawBatch);
+            base.Draw(deltaTime, DrawBatch);
         }
 
         public override void OnExit()
         {
-            GameState.Get().IsPaused = false;
+            StateHandler.Get().IsPaused = false;
         }
     }
 }

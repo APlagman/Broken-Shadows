@@ -7,68 +7,64 @@ namespace Broken_Shadows.Objects
 {
     public class Tile : GameObject
     {
-        string _selectName;
-        static Texture2D _selectTexture;
-        bool _interactable;
-        bool _isSpawn;
-        bool _isGoal;
-        bool _allowsMovement;
-        bool _isRigid;
-        bool _isMoving;
-        bool _selected;
+        private string selectName = "Tiles/Highlight";
+        private static Texture2D selectTexture;
 
-        public bool AllowsMovement { get { return _allowsMovement; } }
-        public bool IsInteractable { get { return _interactable; } }
-        public bool IsSpawn { get { return _isSpawn; } }
-        public bool IsGoal { get { return _isGoal; } }
-        public bool IsRigid { get { return _isRigid; } }
-        public bool IsMoving { get { return _isMoving; } set { _isMoving = value; } }
-        public bool IsSelected { get { return _selected; } set { _selected = value; } }
-        public LinkedList<NeighborTile> Neighbors = new LinkedList<NeighborTile>();
-        public Light Light { get; set; }
+        public bool AllowsMovement { get; }
+        public bool IsInteractable { get; }
+        public bool IsSpawn { get; }
+        public bool IsGoal { get; }
+        public bool IsRigid { get; }
+        public bool IsMoving { get; set; } = false;
+        public bool IsSelected { get; set; }
+        public Graphics.PointLight Light { get; set; }
+        public List<NeighborTile> Neighbors { get; } = new List<NeighborTile>();
 
-        public Tile(Game game, string textureName = "Tiles/BlankTile", bool isSpawn = false, bool movementAllowed = false, bool isGoal = false, bool isRigid = true, bool canInteract = false, bool selected = false)
-            : base(game)
+        public Tile(Game game, Pose2D pose, string textureName = "Tiles/BlankTile", bool isSpawn = false, bool movementAllowed = false, bool isGoal = false, bool isRigid = true, bool canInteract = false, bool selected = false)
+            : base(game, textureName, pose)
         {
-            _interactable = canInteract;
-            _allowsMovement = movementAllowed;
-            _isSpawn = isSpawn;        
-            _isGoal = isGoal;
-            _isRigid = isRigid;
-            _isMoving = false;
-            _selected = selected;
+            IsInteractable = canInteract;
+            AllowsMovement = movementAllowed;
+            IsSpawn = isSpawn;        
+            IsGoal = isGoal;
+            IsRigid = isRigid;
+            IsSelected = selected;
 
-            _textureName = textureName;
-            _selectName = "Tiles/Highlight";
+            TextureName = textureName;
 
             Load();
-            if (isSpawn || isGoal)
-                Light = new Light(game, Color.White, LightType.SPOTLIGHT, _texture);
+            if (isSpawn)
+                Light = new Graphics.PointLight(Graphics.GraphicsManager.Get().LightEffect, Pose.Position, 75f, Color.Green, 0.5f);
+            else if (isGoal)
+                Light = new Graphics.PointLight(Graphics.GraphicsManager.Get().LightEffect, Pose.Position, 75f, Color.Red, 0.5f);
         }
 
-        public override void Update(float fDeltaTime)
+        public override void Update(float deltaTime)
         {
             if (Light != null)
-                Light.UpdatePosition(Position);
-            base.Update(fDeltaTime);
+                Light.Position = Pose.Position;
+
+            base.Update(deltaTime);
         }
 
-        public override void Draw(SpriteBatch batch)
+        public override void Draw(SpriteBatch batch, float rotation, Vector2 origin, float scale, SpriteEffects effects, float depth)
         {
-            base.Draw(batch);
+            base.Draw(batch, rotation, origin, scale, effects, depth);
             if (IsSelected)
-                batch.Draw(_selectTexture, Position, Color.White);
+            {
+                batch.Draw(selectTexture, Pose.Position, null, Color.White, rotation, origin, scale, effects, depth);
+            }
         }
 
         public override void Load()
         {
             base.Load();
-            _selectTexture = _game.Content.Load<Texture2D>(_selectName);
+            selectTexture = game.Content.Load<Texture2D>(selectName);
         }
 
         public void AddNeighbor(Tile t, string direction)
         {
-            Neighbors.AddLast(new NeighborTile(t, (eDirection)Enum.Parse(typeof(eDirection), direction)));
+            Neighbors.Add(new NeighborTile(t, (Direction)Enum.Parse(typeof(Direction), direction)));
         }
     }
 }

@@ -5,14 +5,14 @@ using Microsoft.Xna.Framework.Input;
 
 namespace Broken_Shadows
 {
-    public enum eBindType
+    public enum BindType
     {
         JustPressed, // Was just pressed
         JustReleased, // Was just released
         Held // Was just pressed OR being held
     }
 
-    public enum eBindings
+    public enum Binding
     {
         UI_Exit = 0,
         Pan_Down,
@@ -31,22 +31,22 @@ namespace Broken_Shadows
 
     public class BindInfo
     {
-        public BindInfo(Keys Key, eBindType Type)
+        public BindInfo(Keys Key, BindType Type)
         {
-            _key = Key;
-            _type = Type;
+            key = Key;
+            type = Type;
         }
 
-        public Keys _key;
-        public eBindType _type;
+        public Keys key;
+        public BindType type;
 
         public override string ToString()
         {
-            return _key.ToString() + ", " + _type.ToString(); // For debug purposes
+            return key.ToString() + ", " + type.ToString(); // For debug purposes
         }
     }
 
-    public enum eMouseState
+    public enum MouseState
     {
         Default = 0,
         ScrollUp,
@@ -59,130 +59,130 @@ namespace Broken_Shadows
     public class InputManager : Patterns.Singleton<InputManager>
     {
         // Keyboard binding map
-        private SortedList<eBindings, BindInfo> _bindings;
+        private SortedList<Binding, BindInfo> bindings;
         private void InitializeBindings()
         {
-            _bindings = new SortedList<eBindings, BindInfo>();
+            bindings = new SortedList<Binding, BindInfo>();
             // UI Bindings
-            _bindings.Add(eBindings.UI_Exit, new BindInfo(Keys.Escape, eBindType.JustPressed));
+            bindings.Add(Binding.UI_Exit, new BindInfo(Keys.Escape, BindType.JustPressed));
 
             // Movement Bindings
-            _bindings.Add(eBindings.Pan_Up, new BindInfo(Keys.Up, eBindType.Held));
-            _bindings.Add(eBindings.Pan_Left, new BindInfo(Keys.Left, eBindType.Held));
-            _bindings.Add(eBindings.Pan_Down, new BindInfo(Keys.Down, eBindType.Held));
-            _bindings.Add(eBindings.Pan_Right, new BindInfo(Keys.Right, eBindType.Held));
-            _bindings.Add(eBindings.Reset_Pan, new BindInfo(Keys.Tab, eBindType.JustPressed));
-            _bindings.Add(eBindings.Toggle_Center_Player, new BindInfo(Keys.LeftShift, eBindType.JustPressed));
-            _bindings.Add(eBindings.Reset_Level, new BindInfo(Keys.R, eBindType.JustPressed));
-            _bindings.Add(eBindings.Move_Up, new BindInfo(Keys.W, eBindType.Held));
-            _bindings.Add(eBindings.Move_Left, new BindInfo(Keys.A, eBindType.Held));
-            _bindings.Add(eBindings.Move_Down, new BindInfo(Keys.S, eBindType.Held));
-            _bindings.Add(eBindings.Move_Right, new BindInfo(Keys.D, eBindType.Held));
+            bindings.Add(Binding.Pan_Up, new BindInfo(Keys.Up, BindType.Held));
+            bindings.Add(Binding.Pan_Left, new BindInfo(Keys.Left, BindType.Held));
+            bindings.Add(Binding.Pan_Down, new BindInfo(Keys.Down, BindType.Held));
+            bindings.Add(Binding.Pan_Right, new BindInfo(Keys.Right, BindType.Held));
+            bindings.Add(Binding.Reset_Pan, new BindInfo(Keys.Tab, BindType.JustPressed));
+            bindings.Add(Binding.Toggle_Center_Player, new BindInfo(Keys.LeftShift, BindType.JustPressed));
+            bindings.Add(Binding.Reset_Level, new BindInfo(Keys.R, BindType.JustPressed));
+            bindings.Add(Binding.Move_Up, new BindInfo(Keys.W, BindType.Held));
+            bindings.Add(Binding.Move_Left, new BindInfo(Keys.A, BindType.Held));
+            bindings.Add(Binding.Move_Down, new BindInfo(Keys.S, BindType.Held));
+            bindings.Add(Binding.Move_Right, new BindInfo(Keys.D, BindType.Held));
         }
 
-        private SortedList<eBindings, BindInfo> _activeBinds = new SortedList<eBindings, BindInfo>();
+        private SortedList<Binding, BindInfo> activeBinds = new SortedList<Binding, BindInfo>();
 
-        KeyboardState _prevKey, _curKey;
-        MouseState _prevMouse, _curMouse;
-        eMouseState _mouseState = eMouseState.Default;
-        Point _mousePos = Point.Zero;
-        public eMouseState MouseState { get { return _mouseState; } set { _mouseState = value; } }
-        public Point MousePosition { get { return _mousePos; } }
+        private KeyboardState prevKey, curKey;
+        private Microsoft.Xna.Framework.Input.MouseState prevMouse, curMouse;
+        private MouseState mouseState = MouseState.Default;
+        private Point mousePos = Point.Zero;
+        public MouseState MouseState { get { return mouseState; } set { mouseState = value; } }
+        public Point MousePosition { get { return mousePos; } }
 
         public void Start()
         {
             InitializeBindings();
 
-            _prevMouse = Mouse.GetState();
-            _curMouse = Mouse.GetState();
+            prevMouse = Mouse.GetState();
+            curMouse = Mouse.GetState();
 
-            _mousePos = _curMouse.Position;
+            mousePos = curMouse.Position;
 
-            _prevKey = Keyboard.GetState();
-            _curKey = Keyboard.GetState();
+            prevKey = Keyboard.GetState();
+            curKey = Keyboard.GetState();
         }
 
-        public void UpdateMouse(float fDeltaTime)
+        public void UpdateMouse(float deltaTime)
         {
-            _prevMouse = _curMouse;
-            _curMouse = Mouse.GetState();
+            prevMouse = curMouse;
+            curMouse = Mouse.GetState();
 
-            _mousePos = _curMouse.Position;
+            mousePos = curMouse.Position;
 
             // Check for click
-            if (JustPressed(_prevMouse.LeftButton, _curMouse.LeftButton))
+            if (JustPressed(prevMouse.LeftButton, curMouse.LeftButton))
             {
                 // If the UI doesn't handle it, send it to GameState
-                if (GameState.Get().UICount == 0 ||
-                    !GameState.Get().GetCurrentUI().MouseClick(_mousePos))
+                if (StateHandler.Get().UICount == 0 ||
+                    !StateHandler.Get().GetCurrentUI().MouseClick(mousePos))
                 {
-                    GameState.Get().MouseClick(_mousePos);
+                    StateHandler.Get().MouseClick(mousePos);
                 }
             }
         }
 
-        public void UpdateKeyboard(float fDeltaTime)
+        public void UpdateKeyboard(float deltaTime)
         {
-            _prevKey = _curKey;
-            _curKey = Keyboard.GetState();
-            _activeBinds.Clear();
+            prevKey = curKey;
+            curKey = Keyboard.GetState();
+            activeBinds.Clear();
 
             // Build the list of bindings which were triggered this frame
-            foreach (KeyValuePair<eBindings, BindInfo> k in _bindings)
+            foreach (KeyValuePair<Binding, BindInfo> k in bindings)
             {
-                Keys Key = k.Value._key;
-                eBindType Type = k.Value._type;
+                Keys Key = k.Value.key;
+                BindType Type = k.Value.type;
                 switch (Type)
                 {
-                    case (eBindType.Held):
-                        if ( _curKey.IsKeyDown(Key))
+                    case (BindType.Held):
+                        if ( curKey.IsKeyDown(Key))
                         {
-                            _activeBinds.Add(k.Key, k.Value);
+                            activeBinds.Add(k.Key, k.Value);
                         }
                         break;
-                    case (eBindType.JustPressed):
-                        if (!_prevKey.IsKeyDown(Key) &&
-                            _curKey.IsKeyDown(Key))
+                    case (BindType.JustPressed):
+                        if (!prevKey.IsKeyDown(Key) &&
+                            curKey.IsKeyDown(Key))
                         {
-                            _activeBinds.Add(k.Key, k.Value);
+                            activeBinds.Add(k.Key, k.Value);
                         }
                         break;
-                    case (eBindType.JustReleased):
-                        if (_prevKey.IsKeyDown(Key) &&
-                            !_curKey.IsKeyDown(Key))
+                    case (BindType.JustReleased):
+                        if (prevKey.IsKeyDown(Key) &&
+                            !curKey.IsKeyDown(Key))
                         {
-                            _activeBinds.Add(k.Key, k.Value);
+                            activeBinds.Add(k.Key, k.Value);
                         }
                         break;
                 }
             }
 
-            if (_activeBinds.Count > 0)
+            if (activeBinds.Count > 0)
             {
                 // Send the list to the UI first, then any remnants to the game
-                if (GameState.Get().UICount != 0)
+                if (StateHandler.Get().UICount != 0)
                 {
-                    GameState.Get().GetCurrentUI().KeyboardInput(_activeBinds);
+                    StateHandler.Get().GetCurrentUI().KeyboardInput(activeBinds);
                 }
 
-                GameState.Get().KeyboardInput(_activeBinds);
+                StateHandler.Get().KeyboardInput(activeBinds);
             }
         }
 
-        public void Update(float fDeltaTime)
+        public void Update(float deltaTime)
         {
-            UpdateMouse(fDeltaTime);
-            UpdateKeyboard(fDeltaTime);
-            /*if (_activeBinds.Count > 0)
+            UpdateMouse(deltaTime);
+            UpdateKeyboard(deltaTime);
+            /*if (activeBinds.Count > 0)
             {
-                foreach (KeyValuePair<eBindings, BindInfo> p in _activeBinds)
+                foreach (KeyValuePair<eBindings, BindInfo> p in activeBinds)
                     System.Diagnostics.Debug.WriteLine(p);
             }*/
         }
 
         public Point CalculateMousePoint()
         {
-            return _mousePos;
+            return mousePos;
         }
 
         protected bool JustPressed(ButtonState Previous, ButtonState Current)
@@ -200,9 +200,9 @@ namespace Broken_Shadows
 
         // Convert key binding to string representing the name
         // TODO: THIS IS NOT LOCALIZED
-        public string GetBinding(eBindings binding)
+        public string GetBinding(Binding binding)
         {
-            Keys k = _bindings[binding]._key;
+            Keys k = bindings[binding].key;
             string name = Enum.GetName(typeof(Keys), k);
             if (k == Keys.OemPlus)
             {

@@ -5,39 +5,54 @@ namespace Broken_Shadows.Objects
 {
     public class GameObject
     {
-        bool _enabled = true;
-        protected Texture2D _texture;
-        protected Vector2 _position, _origin = Vector2.Zero;
-        protected Game _game;
-        protected string _textureName;
+        protected Game game;
 
-        public Vector2 Position { get { return _position; } set { _position = value; } }   
-        public Vector2 OriginPosition { get { return _origin; } set { _origin = value; } }
-        public bool Enabled { get { return _enabled; } set { _enabled = value; } }
-        public string Texture { set { _textureName = value; } }
+        public Pose2D Pose { get; set; }
+        // OriginPosition is relative to (0,0) in case the grid is reset to match how it would look in a file. 
+        public Vector2 OriginPosition { get; set; }
+        public bool Enabled { get; set; }
 
-        public GameObject(Game game)
+        public string TextureName { get; set; }
+        public string GlowTextureName { get; set; }
+        public Texture2D GlowTexture { get; protected set; }
+        public Texture2D Texture { get; protected set; }
+
+        public GameObject(Game game, string texture, Pose2D pose)
+            :this(game, texture, pose, null) { }
+
+        public GameObject(Game game, string texture, Vector2 position, float rotation)
+            : this(game, texture, new Pose2D(position, rotation)) { }
+
+        public GameObject(Game game, string texture, Vector2 position, float rotation, string glowTexture)
+            : this(game, texture, new Pose2D(position, rotation), glowTexture) { }
+
+        public GameObject(Game game, string texture, Pose2D pose, string glowTexture)
         {
-            _game = game;
-            OriginPosition = Position = new Vector2(0, 0);
+            Enabled = true;
+            this.game = game;
+            TextureName = texture;
+            GlowTextureName = glowTexture;
+            Pose = pose;          
+            OriginPosition = pose.Position;
         }
 
         public virtual void Load()
         {
-            _texture = _game.Content.Load<Texture2D>(_textureName);
+            Texture = game.Content.Load<Texture2D>(TextureName);
+            if (GlowTextureName != null) GlowTexture = game.Content.Load<Texture2D>(GlowTextureName);
         }
 
         public virtual void Unload()
         {
         }
 
-        public virtual void Update(float fDeltaTime)
+        public virtual void Update(float deltaTime)
         {
         }
 
-        public virtual void Draw(SpriteBatch batch)
+        public virtual void Draw(SpriteBatch batch, float rotation, Vector2 origin, float scale, SpriteEffects effects, float depth)
         {
-            batch.Draw(_texture, Position, Color.White);
+            batch.Draw(Texture, Pose.Position, null, Color.White, rotation, origin, scale, effects, depth);
         }
     }
 }

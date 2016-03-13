@@ -6,18 +6,18 @@ namespace Broken_Shadows.UI
 {
     public class Button
     {
-        public Rectangle _bounds = new Rectangle();
-        Rectangle _boundsHover = new Rectangle();
+        public Rectangle Bounds = new Rectangle();
+        private Rectangle boundsHover = new Rectangle();
 
-        Texture2D _texDefault;
-        Texture2D _texFocus;
+        private Texture2D texDefault;
+        private Texture2D texFocus;
 
-        SpriteFont _font;
-        string _text = "";
-        Color _colorDefault;
-        Color _colorFocus;
+        private SpriteFont font;
+        private string text = "";
+        private Color colorDefault;
+        private Color colorFocus;
 
-        Action OnClick;
+        private Action OnClick;
         public void Click()
         {
             if (OnClick != null)
@@ -26,11 +26,11 @@ namespace Broken_Shadows.UI
             }
         }
 
-        bool _isFocused;
-        bool _enabled = true;
+        private bool isFocused;
+        private bool enabled = true;
 
-        public bool HasFocus { set { _isFocused = value; } get { return _isFocused; } }
-        public bool Enabled { get { return _enabled; } set { _enabled = value; } }
+        public bool HasFocus { set { isFocused = value; } get { return isFocused; } }
+        public bool Enabled { get { return enabled; } set { enabled = value; } }
 
         // Constructor for text-only buttons
         public Button(Point Position, string TextKey, SpriteFont Font, Color Default,
@@ -41,22 +41,22 @@ namespace Broken_Shadows.UI
             Vector2 vTextSize = Font.MeasureString(Text);
             Vector2 vHoverTextSize = Font.MeasureString("< " + Text + " >");
 
-            _bounds.Location = Position;
-            _bounds.X -= (int)(vTextSize.X / 2.0f);
-            _bounds.Y -= (int)(vTextSize.Y / 2.0f);
-            _bounds.Width = (int)vTextSize.X;
-            _bounds.Height = (int)vTextSize.Y;
+            Bounds.Location = Position;
+            Bounds.X -= (int)(vTextSize.X / 2.0f);
+            Bounds.Y -= (int)(vTextSize.Y / 2.0f);
+            Bounds.Width = (int)vTextSize.X;
+            Bounds.Height = (int)vTextSize.Y;
 
-            _boundsHover.Location = Position;
-            _boundsHover.X -= (int)(vHoverTextSize.X / 2.0f);
-            _boundsHover.Y -= (int)(vHoverTextSize.Y / 2.0f);
-            _boundsHover.Width = (int)vHoverTextSize.X;
-            _boundsHover.Height = (int)vHoverTextSize.Y;
+            boundsHover.Location = Position;
+            boundsHover.X -= (int)(vHoverTextSize.X / 2.0f);
+            boundsHover.Y -= (int)(vHoverTextSize.Y / 2.0f);
+            boundsHover.Width = (int)vHoverTextSize.X;
+            boundsHover.Height = (int)vHoverTextSize.Y;
 
-            _text = Text;
-            _font = Font;
-            _colorDefault = Default;
-            _colorFocus = MouseOver;
+            text = Text;
+            font = Font;
+            colorDefault = Default;
+            colorFocus = MouseOver;
 
             OnClick += Callback;
         }
@@ -65,68 +65,68 @@ namespace Broken_Shadows.UI
         public Button(Point Position, Texture2D DefaultTexture, Texture2D FocusTexture,
             Action Callback)
         {
-            _texDefault = DefaultTexture;
-            _texFocus = FocusTexture;
+            texDefault = DefaultTexture;
+            texFocus = FocusTexture;
 
-            _bounds.Location = Position;
-            _bounds.Width = _texDefault.Width;
-            _bounds.Height = _texDefault.Height;
+            Bounds.Location = Position;
+            Bounds.Width = texDefault.Width;
+            Bounds.Height = texDefault.Height;
 
             OnClick += Callback;
         }
 
-        public void Draw(float fDeltaTime, SpriteBatch DrawBatch)
+        public void Draw(float deltaTime, SpriteBatch DrawBatch)
         {
             if (HasFocus)
             {
-                if (_texFocus != null)
+                if (texFocus != null)
                 {
-                    DrawBatch.Draw(_texFocus, _bounds, Color.White);
+                    DrawBatch.Draw(texFocus, Bounds, Color.White);
                 }
 
-                if (_text != "")
+                if (text != "")
                 {
-                    DrawBatch.DrawString(_font, "< " + _text + " >", new Vector2(_boundsHover.X, _boundsHover.Y), _colorFocus);
+                    DrawBatch.DrawString(font, "< " + text + " >", new Vector2(boundsHover.X, boundsHover.Y), colorFocus);
                 }
             }
             else
             {
-                if (_texDefault != null)
+                if (texDefault != null)
                 {
-                    DrawBatch.Draw(_texDefault, _bounds, Color.White);
+                    DrawBatch.Draw(texDefault, Bounds, Color.White);
                 }
 
-                if (_text != "")
+                if (text != "")
                 {
-                    DrawBatch.DrawString(_font, _text, new Vector2(_bounds.X, _bounds.Y), _colorDefault);
+                    DrawBatch.DrawString(font, text, new Vector2(Bounds.X, Bounds.Y), colorDefault);
                 }
             }
 #if DEBUG
             // Draw the bounds of the rect
-            if (DebugDefines.drawButtonBounds)
+            if (DebugDefines.DrawButtonBounds)
             {
-                Vector2 vStart = new Vector2(_bounds.X, _bounds.Y);
+                Vector2 vStart = new Vector2(Bounds.X, Bounds.Y);
                 Vector2 vEnd = vStart;
-                vEnd.X += _bounds.Width;
+                vEnd.X += Bounds.Width;
                 // Top
                 Graphics.GraphicsManager.Get().DrawLine(DrawBatch, 1.0f, Color.White, vStart, vEnd);
 
                 // Left
                 vEnd = vStart;
-                vEnd.Y += _bounds.Height;
+                vEnd.Y += Bounds.Height;
                 Graphics.GraphicsManager.Get().DrawLine(DrawBatch, 1.0f, Color.White, vStart, vEnd);
 
                 // Bottom
-                vStart.Y += _bounds.Height;
+                vStart.Y += Bounds.Height;
                 vEnd = vStart;
-                vEnd.X += _bounds.Width;
+                vEnd.X += Bounds.Width;
                 Graphics.GraphicsManager.Get().DrawLine(DrawBatch, 1.0f, Color.White, vStart, vEnd);
 
                 // Right
-                vStart = new Vector2(_bounds.X, _bounds.Y);
-                vStart.X += _bounds.Width;
+                vStart = new Vector2(Bounds.X, Bounds.Y);
+                vStart.X += Bounds.Width;
                 vEnd = vStart;
-                vEnd.Y += _bounds.Height;
+                vEnd.Y += Bounds.Height;
                 Graphics.GraphicsManager.Get().DrawLine(DrawBatch, 1.0f, Color.White, vStart, vEnd);
             }
 #endif

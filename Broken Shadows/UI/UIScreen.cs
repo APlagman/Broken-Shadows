@@ -7,25 +7,25 @@ namespace Broken_Shadows.UI
 {
     public class UIScreen
     {
-        protected LinkedList<Button> _buttons = new LinkedList<Button>();
-        protected ContentManager _content;
-        protected float _liveTime = 0.0f;
+        protected LinkedList<Button> buttons = new LinkedList<Button>();
+        protected ContentManager content;
+        protected float liveTime = 0.0f;
         // Determines whether or not you can press ESC to leave the screen
-        protected bool _canExit = false;
+        protected bool canExit = false;
 
         public UIScreen(ContentManager Content)
         {
-            _content = Content;
+            content = Content;
         }
 
-        public virtual void Update(float fDeltaTime)
+        public virtual void Update(float deltaTime)
         {
-            _liveTime += fDeltaTime;
-            foreach (Button b in _buttons)
+            liveTime += deltaTime;
+            foreach (Button b in buttons)
             {
                 // If the button is enabled, the mouse is pointing to it, and the UI is the top one
-                if (b.Enabled && b._bounds.Contains(InputManager.Get().MousePosition) &&
-                    GameState.Get().GetCurrentUI() == this)
+                if (b.Enabled && b.Bounds.Contains(InputManager.Get().MousePosition) &&
+                    StateHandler.Get().GetCurrentUI() == this)
                 {
                     b.HasFocus = true;
                 }
@@ -36,17 +36,17 @@ namespace Broken_Shadows.UI
             }
         }
 
-        public virtual void Draw(float fDeltaTime, SpriteBatch DrawBatch)
+        public virtual void Draw(float deltaTime, SpriteBatch DrawBatch)
         {
-            DrawButtons(fDeltaTime, DrawBatch);
+            DrawButtons(deltaTime, DrawBatch);
         }
 
         public virtual bool MouseClick(Point Position)
         {
             bool clicked = false;
-            foreach (Button b in _buttons)
+            foreach (Button b in buttons)
             {
-                if (b.Enabled && b._bounds.Contains(Position))
+                if (b.Enabled && b.Bounds.Contains(Position))
                 {
                     b.Click();
                     clicked = true;
@@ -57,13 +57,13 @@ namespace Broken_Shadows.UI
             return clicked;
         }
 
-        protected void DrawButtons(float fDeltaTime, SpriteBatch DrawBatch)
+        protected void DrawButtons(float deltaTime, SpriteBatch DrawBatch)
         {
-            foreach (Button b in _buttons)
+            foreach (Button b in buttons)
             {
                 if (b.Enabled)
                 {
-                    b.Draw(fDeltaTime, DrawBatch);
+                    b.Draw(deltaTime, DrawBatch);
                 }
             }
         }
@@ -77,16 +77,16 @@ namespace Broken_Shadows.UI
             DrawBatch.DrawString(font, sText, pos, color);
         }
 
-        public virtual void KeyboardInput(SortedList<eBindings, BindInfo> binds)
+        public virtual void KeyboardInput(SortedList<Binding, BindInfo> binds)
         {
-            if (binds.ContainsKey(eBindings.UI_Exit))
+            if (binds.ContainsKey(Binding.UI_Exit))
             {
-                if (_canExit)
+                if (canExit)
                 {
-                    GameState.Get().PopUI();
+                    StateHandler.Get().PopUI();
                 }
 
-                binds.Remove(eBindings.UI_Exit);
+                binds.Remove(Binding.UI_Exit);
             }
         }
 

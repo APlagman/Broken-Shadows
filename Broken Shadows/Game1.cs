@@ -28,10 +28,10 @@ namespace Broken_Shadows
                 IntermediateSerializer.Serialize(writer, testData, null);
             }*/
 
-            GameState.Get().Start(this);
-            GameState.Get().SetState(eGameState.MainMenu);
+            StateHandler.Get().Start(this);
+            StateHandler.Get().SetState(GameState.MainMenu);
             InputManager.Get().Start();
-            Localization.Get().Start(GlobalDefines.DEFAULT_LOC_FILE);
+            Localization.Get().Start(GlobalDefines.DefaultLocFile);
             base.Initialize();
         }
 
@@ -50,7 +50,7 @@ namespace Broken_Shadows
             if (IsActive)
             {
                 InputManager.Get().Update(deltaTime);
-                GameState.Get().Update(deltaTime);
+                StateHandler.Get().Update(deltaTime);
             }
             base.Update(gameTime);
         }

@@ -12,23 +12,23 @@ namespace Broken_Shadows.UI
         {
         }
 
-        public override void Update(float fDeltaTime)
+        public override void Update(float deltaTime)
         {
-            base.Update(fDeltaTime);
+            base.Update(deltaTime);
         }
 
-        public override void Draw(float fDeltaTime, SpriteBatch DrawBatch)
+        public override void Draw(float deltaTime, SpriteBatch DrawBatch)
         {
-            base.Draw(fDeltaTime, DrawBatch);
+            base.Draw(deltaTime, DrawBatch);
         }
 
-        public override void KeyboardInput(SortedList<eBindings, BindInfo> binds)
+        public override void KeyboardInput(SortedList<Binding, BindInfo> binds)
         {
-            GameState g = GameState.Get();
-            if (binds.ContainsKey(eBindings.UI_Exit))
+            StateHandler g = StateHandler.Get();
+            if (binds.ContainsKey(Binding.UI_Exit))
             {
                 g.ShowPauseMenu();
-                binds.Remove(eBindings.UI_Exit);
+                binds.Remove(Binding.UI_Exit);
             }
 
             base.KeyboardInput(binds);

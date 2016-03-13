@@ -204,3 +204,21 @@
 /processorParam:TextureFormat=Color
 /build:Shaders/conelightmask.png
 
+#begin Shaders/Blur.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/Blur.fx
+
+#begin Shaders/Combine.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/Combine.fx
+
+#begin Shaders/Light.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/Light.fx
+

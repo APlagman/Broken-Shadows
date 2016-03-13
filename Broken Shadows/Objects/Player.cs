@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework;
 
 namespace Broken_Shadows.Objects
 {
-    public enum eSkillType
+    public enum SkillType
     {
         Attack = 0,
         Strength,
@@ -30,10 +30,10 @@ namespace Broken_Shadows.Objects
 
     public struct Skill
     {
-        public eSkillType Name { get; private set; }
+        public SkillType Name { get; private set; }
         public int SkillLevel { get; set; }
 
-        public Skill(eSkillType name, int level)
+        public Skill(SkillType name, int level)
         {
             Name = name;
             SkillLevel = level;
@@ -42,38 +42,37 @@ namespace Broken_Shadows.Objects
 
     public class Player : Entity
     {
-        private List<Skill> _levels;
-        //public List<Skill> SkillLevels { get { return _levels; } protected set { _levels = value; } }
+        //private List<Skill> levels;
+        //public List<Skill> SkillLevels { get { return levels; } protected set { levels = value; } }
         public Tile CurrentTile { get; set; }
-        public Light Light { get; set; }
+        public Graphics.PointLight Light { get; set; }
 
         public Player(Game game)
-            : base(game)
+            : base(game, "Entities/Player", new Pose2D(), null)
         {
-            Texture = "Entities/Player";
             base.Load();
-            _levels = CreateSkills();
+            //levels = CreateSkills();
             UpdateHealth();
-            Defence = _levels.Find(s => s.Name == eSkillType.Defence).SkillLevel;
+            //Defence = levels.Find(s => s.Name == eSkillType.Defence).SkillLevel;
 
             Load();
-            Light = new Light(game, Color.White, LightType.CONE, _texture, 1f);
+            Light = new Graphics.PointLight(Graphics.GraphicsManager.Get().LightEffect, Pose.Position, 250f, Color.White);
         }
 
-        public override void Update(float fDeltaTime)
+        public override void Update(float deltaTime)
         {
-            UpdateCombatLevel();
+            //UpdateCombatLevel();
             if (Light != null)
-                Light.UpdatePosition(new Vector2(Position.X, Position.Y));
+                Light.Position = Pose.Position;
             
-            base.Update(fDeltaTime);
+            base.Update(deltaTime);
         }
 
         /// <summary>
         /// Returns a new list of player skills starting at the base levels.
         /// </summary>
         /// <returns></returns>
-        private List<Skill> CreateSkills()
+        /*private List<Skill> CreateSkills()
         {
             var list = new List<Skill>();
             foreach (eSkillType skill in Enum.GetValues(typeof(eSkillType)))
@@ -89,22 +88,22 @@ namespace Broken_Shadows.Objects
         /// </summary>
         private void UpdateCombatLevel()
         {
-            List<Skill> fightSkills = _levels.FindAll(n => (n.Name == eSkillType.Attack || n.Name == eSkillType.Strength || n.Name == eSkillType.Ranged || n.Name == eSkillType.Magic)).ToList();
+            List<Skill> fightSkills = levels.FindAll(n => (n.Name == eSkillType.Attack || n.Name == eSkillType.Strength || n.Name == eSkillType.Ranged || n.Name == eSkillType.Magic)).ToList();
             int[] fightLevels = fightSkills.Select(l => l.SkillLevel).ToArray();
             int highestCombat = new int[] { fightLevels[0] + fightLevels[1], 2 * fightLevels[2], 2 * fightLevels[3] }.Max();
-            int[] cbLevels = _levels.FindAll(l => l.Name == eSkillType.Defence || l.Name == eSkillType.Constitution || l.Name == eSkillType.Prayer || l.Name == eSkillType.Summoning).Select(l => l.SkillLevel).ToArray();
+            int[] cbLevels = levels.FindAll(l => l.Name == eSkillType.Defence || l.Name == eSkillType.Constitution || l.Name == eSkillType.Prayer || l.Name == eSkillType.Summoning).Select(l => l.SkillLevel).ToArray();
             cbLevels[2] = (int)(cbLevels[2] * 0.5);
             cbLevels[3] = (int)(cbLevels[3] * 0.5);
 
             _combatLevel = (int)(0.25 * (1.3 * highestCombat + cbLevels.Sum()));
-        }
+        }*/
 
         /// <summary>
         /// Sets the player's max health depending on their Constitution level.
         /// </summary>
         public override void UpdateHealth()
         {
-            _maxHealth = _levels.Find(s => s.Name == eSkillType.Constitution).SkillLevel * 10;
+            //_maxHealth = levels.Find(s => s.Name == eSkillType.Constitution).SkillLevel * 10;
             base.UpdateHealth();
         }
 
@@ -121,7 +120,7 @@ namespace Broken_Shadows.Objects
             {
                 foreach (NeighborTile neighbor in CurrentTile.Neighbors)
                 {
-                    if (neighbor.Direction == eDirection.West && neighbor.GetTile.AllowsMovement)
+                    if (neighbor.Direction == Direction.West && neighbor.GetTile.AllowsMovement)
                         canMove = true;
                 }
             }
@@ -130,7 +129,7 @@ namespace Broken_Shadows.Objects
             {
                 foreach (NeighborTile neighbor in CurrentTile.Neighbors)
                 {
-                    if (neighbor.Direction == eDirection.East && neighbor.GetTile.AllowsMovement)
+                    if (neighbor.Direction == Direction.East && neighbor.GetTile.AllowsMovement)
                         canMove = true;
                 }
             }
@@ -139,7 +138,7 @@ namespace Broken_Shadows.Objects
             {
                 foreach (NeighborTile neighbor in CurrentTile.Neighbors)
                 {
-                    if (neighbor.Direction == eDirection.North && neighbor.GetTile.AllowsMovement)
+                    if (neighbor.Direction == Direction.North && neighbor.GetTile.AllowsMovement)
                         canMove = true;
                 }
             }
@@ -148,7 +147,7 @@ namespace Broken_Shadows.Objects
             {
                 foreach (NeighborTile neighbor in CurrentTile.Neighbors)
                 {
-                    if (neighbor.Direction == eDirection.South && neighbor.GetTile.AllowsMovement)
+                    if (neighbor.Direction == Direction.South && neighbor.GetTile.AllowsMovement)
                         canMove = true;
                 }
             }
@@ -158,11 +157,11 @@ namespace Broken_Shadows.Objects
                 int check = 0;
                 foreach (NeighborTile neighbor in CurrentTile.Neighbors)
                 {
-                    if (neighbor.Direction == eDirection.NorthWest && neighbor.GetTile.AllowsMovement)
+                    if (neighbor.Direction == Direction.NorthWest && neighbor.GetTile.AllowsMovement)
                         check++;
-                    if (neighbor.Direction == eDirection.North && neighbor.GetTile.AllowsMovement)
+                    if (neighbor.Direction == Direction.North && neighbor.GetTile.AllowsMovement)
                         check++;
-                    if (neighbor.Direction == eDirection.West && neighbor.GetTile.AllowsMovement)
+                    if (neighbor.Direction == Direction.West && neighbor.GetTile.AllowsMovement)
                         check++;
                 }
                 if (check == 3)
@@ -174,11 +173,11 @@ namespace Broken_Shadows.Objects
                 int check = 0;
                 foreach (NeighborTile neighbor in CurrentTile.Neighbors)
                 {
-                    if (neighbor.Direction == eDirection.NorthEast && neighbor.GetTile.AllowsMovement)
+                    if (neighbor.Direction == Direction.NorthEast && neighbor.GetTile.AllowsMovement)
                         check++;
-                    if (neighbor.Direction == eDirection.North && neighbor.GetTile.AllowsMovement)
+                    if (neighbor.Direction == Direction.North && neighbor.GetTile.AllowsMovement)
                         check++;
-                    if (neighbor.Direction == eDirection.East && neighbor.GetTile.AllowsMovement)
+                    if (neighbor.Direction == Direction.East && neighbor.GetTile.AllowsMovement)
                         check++;
                 }
                 if (check == 3)
@@ -190,11 +189,11 @@ namespace Broken_Shadows.Objects
                 int check = 0;
                 foreach (NeighborTile neighbor in CurrentTile.Neighbors)
                 {
-                    if (neighbor.Direction == eDirection.SouthWest && neighbor.GetTile.AllowsMovement)
+                    if (neighbor.Direction == Direction.SouthWest && neighbor.GetTile.AllowsMovement)
                         check++;
-                    if (neighbor.Direction == eDirection.South && neighbor.GetTile.AllowsMovement)
+                    if (neighbor.Direction == Direction.South && neighbor.GetTile.AllowsMovement)
                         check++;
-                    if (neighbor.Direction == eDirection.West && neighbor.GetTile.AllowsMovement)
+                    if (neighbor.Direction == Direction.West && neighbor.GetTile.AllowsMovement)
                         check++;
                 }
                 if (check == 3)
@@ -206,11 +205,11 @@ namespace Broken_Shadows.Objects
                 int check = 0;
                 foreach (NeighborTile neighbor in CurrentTile.Neighbors)
                 {
-                    if (neighbor.Direction == eDirection.SouthEast && neighbor.GetTile.AllowsMovement)
+                    if (neighbor.Direction == Direction.SouthEast && neighbor.GetTile.AllowsMovement)
                         check++;
-                    if (neighbor.Direction == eDirection.South && neighbor.GetTile.AllowsMovement)
+                    if (neighbor.Direction == Direction.South && neighbor.GetTile.AllowsMovement)
                         check++;
-                    if (neighbor.Direction == eDirection.East && neighbor.GetTile.AllowsMovement)
+                    if (neighbor.Direction == Direction.East && neighbor.GetTile.AllowsMovement)
                         check++;
                 }
                 if (check == 3)

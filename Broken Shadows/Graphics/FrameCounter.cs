@@ -10,20 +10,18 @@ namespace Broken_Shadows.Graphics
         public float AverageFramesPerSecond { get; private set; }
         public float CurrentFramesPerSecond { get; private set; }
 
-        public const int MAXIMUM_SAMPLES = 100;
-
-        private Queue<float> _sampleBuffer = new Queue<float>();
+        private Queue<float> sampleBuffer = new Queue<float>();
 
         public bool Update(float deltaTime)
         {
             CurrentFramesPerSecond = 1.0f / deltaTime;
 
-            _sampleBuffer.Enqueue(CurrentFramesPerSecond);
+            sampleBuffer.Enqueue(CurrentFramesPerSecond);
 
-            if (_sampleBuffer.Count > MAXIMUM_SAMPLES)
+            if (sampleBuffer.Count > GlobalDefines.MaxFpsSamples)
             {
-                _sampleBuffer.Dequeue();
-                AverageFramesPerSecond = _sampleBuffer.Average(i => i);
+                sampleBuffer.Dequeue();
+                AverageFramesPerSecond = sampleBuffer.Average();
             }
             else
             {

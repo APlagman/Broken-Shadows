@@ -6,42 +6,42 @@ namespace Broken_Shadows.UI
 {
     public class UIMainMenu : UIScreen
     {
-        SpriteFont _titleFont;
-        SpriteFont _buttonFont;
-        string _title;
+        private SpriteFont titleFont;
+        private SpriteFont buttonFont;
+        private string title;
 
         public UIMainMenu(ContentManager Content) :
             base(Content)
         {
-            _titleFont = _content.Load<SpriteFont>("Fonts/QuartzTitle");
-            _buttonFont = _content.Load<SpriteFont>("Fonts/QuartzButton");
+            titleFont = content.Load<SpriteFont>("Fonts/QuartzTitle");
+            buttonFont = content.Load<SpriteFont>("Fonts/QuartzButton");
 
             // Create buttons
             Point vPos = new Point();
             vPos.X = (int)(Graphics.GraphicsManager.Get().Width / 2.0f);
             vPos.Y = (int)(Graphics.GraphicsManager.Get().Height / 2.0f);
 
-            _title = Localization.Get().Text("ui_title");
+            title = Localization.Get().Text("ui_title");
 
-            _buttons.AddLast(new Button(vPos, "ui_new_game",
-                _buttonFont, Color.White,
+            buttons.AddLast(new Button(vPos, "ui_new_game",
+                buttonFont, Color.White,
                 Color.Purple, NewGame));
 
             vPos.Y += 100;
-            _buttons.AddLast(new Button(vPos, "ui_help_title",
-                _buttonFont, Color.White,
+            buttons.AddLast(new Button(vPos, "ui_help_title",
+                buttonFont, Color.White,
                 Color.Purple, Help));
 
             vPos.Y += 50;
-            _buttons.AddLast(new Button(vPos, "ui_shutdown",
-                _buttonFont, Color.White,
+            buttons.AddLast(new Button(vPos, "ui_shutdown",
+                buttonFont, Color.White,
                 Color.Purple, Exit));
         }
 
         public void NewGame()
         {
             //SoundManager.Get().PlaySoundCue("MenuClick");
-            GameState.Get().SetState(eGameState.OverWorld);
+            StateHandler.Get().SetState(GameState.OverWorld);
         }
 
         public void Options()
@@ -50,27 +50,27 @@ namespace Broken_Shadows.UI
 
         public void Help()
         {
-            GameState.Get().ShowHelpMenu();
+            StateHandler.Get().ShowHelpMenu();
         }
 
         public void Exit()
         {
             //SoundManager.Get().PlaySoundCue("MenuClick");
-            GameState.Get().Exit();
+            StateHandler.Get().Exit();
         }
 
-        public override void Update(float fDeltaTime)
+        public override void Update(float deltaTime)
         {
-            base.Update(fDeltaTime);
+            base.Update(deltaTime);
         }
 
-        public override void Draw(float fDeltaTime, SpriteBatch DrawBatch)
+        public override void Draw(float deltaTime, SpriteBatch DrawBatch)
         {
             Vector2 vOffset = Vector2.Zero;
             vOffset.Y = -1.0f * Graphics.GraphicsManager.Get().Height / 4.0f;
-            DrawCenteredString(DrawBatch, _title, _titleFont, Color.MediumPurple, vOffset);
+            DrawCenteredString(DrawBatch, title, titleFont, Color.MediumPurple, vOffset);
 
-            base.Draw(fDeltaTime, DrawBatch);
+            base.Draw(deltaTime, DrawBatch);
         }
     }
 }
