@@ -5,7 +5,6 @@ Written by Roy Triesscheijn.
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using Broken_Shadows.Utils;
 
 namespace Broken_Shadows.Visibility
 {
@@ -19,17 +18,15 @@ namespace Broken_Shadows.Visibility
         private List<Endpoint> endpoints;
         private List<Segment> segments;
 
-        private Vector2 origin;
         /// <summary>
         /// The origin, or position of the observer
         /// </summary>
-        public Vector2 Origin { get { return origin; } }
-
-        private float radius;
+        public Vector2 Origin { get; set; }
+        
         /// <summary>
         /// The maxiumum view distance
         /// </summary>
-        public float Radius { get { return radius; } }
+        public float Radius { get; set; }
 
         private EndpointComparer radialComparer;
 
@@ -39,8 +36,8 @@ namespace Broken_Shadows.Visibility
             endpoints = new List<Endpoint>();
             radialComparer = new EndpointComparer();
 
-            this.origin = origin;
-            this.radius = radius;
+            Origin = origin;
+            Radius = radius;
             LoadBoundaries();
         }
 
@@ -53,7 +50,7 @@ namespace Broken_Shadows.Visibility
             float y = position.Y;
 
             // The distance to each corner is the half of the width times sqrt(2)
-            float radius = width * 0.5f * 1.41f;
+            float Radius = width * 0.5f * 1.41f;
 
             // Add Pi/4 to get the corners
             rotation += MathHelper.PiOver4;
@@ -63,8 +60,8 @@ namespace Broken_Shadows.Visibility
             {
                 corners[i] = new Vector2
                     (
-                        (float)Math.Cos(rotation + i * Math.PI * 0.5) * radius + x,
-                        (float)Math.Sin(rotation + i * Math.PI * 0.5) * radius + y
+                        (float)Math.Cos(rotation + i * Math.PI * 0.5) * Radius + x,
+                        (float)Math.Sin(rotation + i * Math.PI * 0.5) * Radius + y
                     );
             }
 
@@ -118,25 +115,25 @@ namespace Broken_Shadows.Visibility
 
         /// <summary>
         /// Helper function to construct segments along the outside perimiter
-        /// in order to limit the radius of the light
+        /// in order to limit the Radius of the light
         /// </summary>        
         private void LoadBoundaries()
         {
             //Top
-            AddSegment(new Vector2(origin.X - radius, origin.Y - radius),
-                            new Vector2(origin.X + radius, origin.Y - radius));
+            AddSegment(new Vector2(Origin.X - Radius, Origin.Y - Radius),
+                            new Vector2(Origin.X + Radius, Origin.Y - Radius));
 
             //Bottom
-            AddSegment(new Vector2(origin.X - radius, origin.Y + radius),
-                            new Vector2(origin.X + radius, origin.Y + radius));
+            AddSegment(new Vector2(Origin.X - Radius, Origin.Y + Radius),
+                            new Vector2(Origin.X + Radius, Origin.Y + Radius));
 
             //Left
-            AddSegment(new Vector2(origin.X - radius, origin.Y - radius),
-                            new Vector2(origin.X - radius, origin.Y + radius));
+            AddSegment(new Vector2(Origin.X - Radius, Origin.Y - Radius),
+                            new Vector2(Origin.X - Radius, Origin.Y + Radius));
 
             //Right
-            AddSegment(new Vector2(origin.X + radius, origin.Y - radius),
-                            new Vector2(origin.X + radius, origin.Y + radius));
+            AddSegment(new Vector2(Origin.X + Radius, Origin.Y - Radius),
+                            new Vector2(Origin.X + Radius, Origin.Y + Radius));
         }
 
         // Processes segments so that we can sort them later
@@ -150,10 +147,10 @@ namespace Broken_Shadows.Visibility
                 // <https://github.com/mikolalysenko/compare-slope> for a
                 // library that does this.
 
-                segment.P1.Angle = (float)Math.Atan2(segment.P1.Position.Y - origin.Y,
-                                                        segment.P1.Position.X - origin.X);
-                segment.P2.Angle = (float)Math.Atan2(segment.P2.Position.Y - origin.Y,
-                                                        segment.P2.Position.X - origin.X);
+                segment.P1.Angle = (float)Math.Atan2(segment.P1.Position.Y - Origin.Y,
+                                                        segment.P1.Position.X - Origin.X);
+                segment.P2.Angle = (float)Math.Atan2(segment.P2.Position.Y - Origin.Y,
+                                                        segment.P2.Position.X - Origin.X);
 
                 // Map angle between -Pi and Pi
                 float dAngle = segment.P2.Angle - segment.P1.Angle;
@@ -242,7 +239,7 @@ namespace Broken_Shadows.Visibility
                     {
                         // Insert into the right place in the list
                         var node = open.First;
-                        while (node != null && SegmentInFrontOf(p.Segment, node.Value, origin))
+                        while (node != null && SegmentInFrontOf(p.Segment, node.Value, Origin))
                         {
                             node = node.Next;
                         }
@@ -285,8 +282,8 @@ namespace Broken_Shadows.Visibility
 
         private void AddTriangle(List<Vector2> triangles, float angle1, float angle2, Segment segment)
         {
-            Vector2 p1 = origin;
-            Vector2 p2 = new Vector2(origin.X + (float)Math.Cos(angle1), origin.Y + (float)Math.Sin(angle1));
+            Vector2 p1 = Origin;
+            Vector2 p2 = new Vector2(Origin.X + (float)Math.Cos(angle1), Origin.Y + (float)Math.Sin(angle1));
             Vector2 p3 = Vector2.Zero;
             Vector2 p4 = Vector2.Zero;
 
@@ -302,16 +299,16 @@ namespace Broken_Shadows.Visibility
             {
                 // Stop the triangle at a fixed distance; this probably is
                 // not what we want, but it never gets used in the demo
-                p3.X = origin.X + (float)Math.Cos(angle1) * radius * 2;
-                p3.Y = origin.Y + (float)Math.Sin(angle1) * radius * 2;
-                p4.X = origin.X + (float)Math.Cos(angle2) * radius * 2;
-                p4.Y = origin.Y + (float)Math.Sin(angle2) * radius * 2;
+                p3.X = Origin.X + (float)Math.Cos(angle1) * Radius * 2;
+                p3.Y = Origin.Y + (float)Math.Sin(angle1) * Radius * 2;
+                p4.X = Origin.X + (float)Math.Cos(angle2) * Radius * 2;
+                p4.Y = Origin.Y + (float)Math.Sin(angle2) * Radius * 2;
             }
 
             Vector2 pBegin = VectorMath.LineLineIntersection(p3, p4, p1, p2);
 
-            p2.X = origin.X + (float)Math.Cos(angle2);
-            p2.Y = origin.Y + (float)Math.Sin(angle2);
+            p2.X = Origin.X + (float)Math.Cos(angle2);
+            p2.Y = Origin.Y + (float)Math.Sin(angle2);
 
             Vector2 pEnd = VectorMath.LineLineIntersection(p3, p4, p1, p2);
 

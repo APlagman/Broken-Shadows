@@ -16,7 +16,7 @@ using System.Xml;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Broken_Shadows.Utils
+namespace Broken_Shadows.Graphics
 {
     internal struct FormatInstruction
     {

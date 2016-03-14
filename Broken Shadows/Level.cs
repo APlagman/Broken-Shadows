@@ -21,10 +21,11 @@ namespace Broken_Shadows
         }
 
         private Game game;
-        private Tile[,] Tiles;
-        private Tile spawnTile, goalTile;
-        public Tile SpawnTile { get { return spawnTile; } }
-        public Tile GoalTile { get { return goalTile; } }
+        public Tile[,] Tiles { get; private set; }
+        public int Width { get { return Tiles.GetLength(1); } }
+        public int Height { get { return Tiles.GetLength(0); } }
+        public Tile SpawnTile { get; private set; }
+        public Tile GoalTile { get; private set; }
         public Color LevelColor;
 
         public Level(Game game)
@@ -108,9 +109,9 @@ namespace Broken_Shadows
                         Tile t = CreateTile(new Vector2(colCount * tileHeight, rowCount * tileHeight), type);
 
                         if (t.IsSpawn)
-                            spawnTile = t;
+                            SpawnTile = t;
                         if (t.IsGoal)
-                            goalTile = t;
+                            GoalTile = t;
 
                         Tiles[rowCount,colCount] = t;
                     }
@@ -374,5 +375,13 @@ namespace Broken_Shadows
             }
             AssignNeighbors(Tiles, Tiles.GetLength(0), Tiles.GetLength(1));
         }      
+
+        public bool IsSolid(int x, int y)
+        {
+            if (x >= 0 && x < Width && y >= 0 && y < Height)
+                return (Tiles[y, x] != null) ? Tiles[y, x].AllowsMovement : false;
+            else
+                return false;
+        }
     }
 }

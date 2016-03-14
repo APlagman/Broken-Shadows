@@ -1,10 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace Broken_Shadows.Utils
+namespace Broken_Shadows.Visibility
 {
-    /// <summary>
-    /// Common mathematical functions with vectors
-    /// </summary>
     public static class VectorMath
     {
 

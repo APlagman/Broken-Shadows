@@ -6,7 +6,7 @@ namespace Broken_Shadows.Objects
     public class GameObject
     {
         protected Game game;
-
+        
         public Pose2D Pose { get; set; }
         // OriginPosition is relative to (0,0) in case the grid is reset to match how it would look in a file. 
         public Vector2 OriginPosition { get; set; }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
+using Broken_Shadows.Objects;
 
 namespace Broken_Shadows.Graphics
 {
@@ -23,18 +23,18 @@ namespace Broken_Shadows.Graphics
         private Texture2D[] mouseTextures = new Texture2D[(int)MouseState.MAX_STATES];
         private SpriteFont fpsFont;
 
-        private List<Objects.GameObject> solids = new List<Objects.GameObject>();
-        private List<Objects.GameObject> objects = new List<Objects.GameObject>();
-        private List<Objects.Player> playerObjects = new List<Objects.Player>();
+        private List<GameObject> solids = new List<GameObject>();
+        private List<GameObject> objects = new List<GameObject>();
+        private List<Player> playerObjects = new List<Player>();
         private List<PointLight> lights = new List<PointLight>();
-        private Color LevelColor;
+        public Level Level { private get; set; }
 
         private bool IsFullScreen { get { return graphics.IsFullScreen; } set { graphics.IsFullScreen = value; } }
         private bool IsVSync { get { return graphics.SynchronizeWithVerticalRetrace; } set { graphics.SynchronizeWithVerticalRetrace = value; } }
         public int Width { get { return graphics.PreferredBackBufferWidth; } }
         public int Height { get { return graphics.PreferredBackBufferHeight; } }
         public GraphicsDevice GraphicsDevice { get { return graphics.GraphicsDevice; } }
-        public Utils.MarkupTextEngine MarkupEngine { get; internal set; }
+        public MarkupTextEngine MarkupEngine { get; internal set; }
         public bool RenderLights { get; set; }
 
         #region Setup
@@ -95,7 +95,7 @@ namespace Broken_Shadows.Graphics
             var conditions = new Dictionary<string, bool>();
             Func<string, bool> conditionalResolver = c => conditions[c];
 
-            MarkupEngine = new Utils.MarkupTextEngine(fontResolver, imageResolver, conditionalResolver);
+            MarkupEngine = new MarkupTextEngine(fontResolver, imageResolver, conditionalResolver);
 
             //_lights.Add(new Light(lightEffect, new Vector2(300, 300), 50, Color.White, 1.0f));
         }
@@ -134,7 +134,7 @@ namespace Broken_Shadows.Graphics
             DrawColorMap();
 
             // Draw the lights
-            DrawLightMap((float)(LevelColor.A / 255.0));
+            if (Level != null) DrawLightMap((float)(Level.LevelColor.A / 255.0));
 
             // Blur the shadows
             BlurRenderTarget(lightMap, 2.5f);
@@ -153,12 +153,12 @@ namespace Broken_Shadows.Graphics
 
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.Default, RasterizerState.CullCounterClockwise, null);
           
-            foreach (Objects.GameObject o in objects)
+            foreach (GameObject o in objects)
             {
                 Vector2 origin = new Vector2(o.Texture.Width / 2.0f, o.Texture.Height / 2.0f);
                 o.Draw(spriteBatch, 0, origin, 1, SpriteEffects.None, 0);
             }
-            foreach (Objects.Player p in playerObjects)
+            foreach (Player p in playerObjects)
             {
                 Vector2 origin = new Vector2(p.Texture.Width / 2.0f, p.Texture.Height / 2.0f);
                 spriteBatch.Draw(p.Texture, p.Pose.Position, null, Color.White, p.Pose.Rotation, origin, p.Pose.Scale, SpriteEffects.None, 0);
@@ -175,7 +175,7 @@ namespace Broken_Shadows.Graphics
             // Draw normal object that emit light
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.Default, RasterizerState.CullCounterClockwise);
 
-            foreach (Objects.GameObject o in objects)
+            foreach (GameObject o in objects)
             {
                 if (o.GlowTexture != null)
                 {
@@ -183,7 +183,7 @@ namespace Broken_Shadows.Graphics
                     spriteBatch.Draw(o.GlowTexture, o.Pose.Position, null, Color.White, o.Pose.Rotation, origin, o.Pose.Scale, SpriteEffects.None, 0);
                 }
             }
-            foreach (Objects.Player p in playerObjects)
+            foreach (Player p in playerObjects)
             {
                 if (p.GlowTexture != null)
                 {
@@ -198,6 +198,7 @@ namespace Broken_Shadows.Graphics
             // Samplers states are set by the shader itself            
             GraphicsDevice.DepthStencilState = DepthStencilState.None;
             GraphicsDevice.RasterizerState = RasterizerState.CullNone;
+
 
             foreach (PointLight l in lights)
             {
@@ -321,27 +322,27 @@ namespace Broken_Shadows.Graphics
         #endregion
 
         #region Objects
-        public void AddGameObject(Objects.GameObject o)
+        public void AddGameObject(GameObject o)
         {
             objects.Add(o);
         }
 
-        public void RemoveGameObject(Objects.GameObject o)
+        public void RemoveGameObject(GameObject o)
         {
             objects.Remove(o);
         }
 
-        public void AddPlayerObject(Objects.Player p)
+        public void AddPlayerObject(Player p)
         {
             playerObjects.Add(p);
         }
 
-        public void RemovePlayerObject(Objects.Player p)
+        public void RemovePlayerObject(Player p)
         {
             playerObjects.Remove(p);
         }
 
-        public void AddSolid(Objects.GameObject o)
+        public void AddSolid(GameObject o)
         {
             solids.Add(o);
         }
@@ -359,15 +360,5 @@ namespace Broken_Shadows.Graphics
             playerObjects.Clear();
         }
         #endregion
-
-        public void ChangeColor(Color newColor)
-        {
-            LevelColor = newColor;
-        }
-
-        public void ChangeColor(byte addBrightness)
-        {
-            LevelColor.A += addBrightness;
-        }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace Broken_Shadows
+namespace Broken_Shadows.Objects
 {
     /// <summary>
     /// Represents the pose of an entity in 2D space

@@ -10,7 +10,7 @@ namespace Broken_Shadows.UI
         private SpriteFont buttonFont;
         private string title;
 
-        Utils.CompiledMarkup instructions;
+        Graphics.CompiledMarkup instructions;
 
         public UIHelpMenu(ContentManager Content) :
             base(Content)

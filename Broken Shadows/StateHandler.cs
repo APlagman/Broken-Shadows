@@ -242,7 +242,7 @@ namespace Broken_Shadows
             currentTile = null;
 
             level.LoadLevel("Levels/Level" + ((loadNext) ? ++levelID : levelID));
-            Graphics.GraphicsManager.Get().ChangeColor(level.LevelColor);
+            Graphics.GraphicsManager.Get().Level = level;
 
             players.Add(new Objects.Player(game));
             foreach (Objects.Player player in players)

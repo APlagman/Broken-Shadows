@@ -12,6 +12,8 @@ namespace Broken_Shadows.Graphics
 {
     public class PointLight
     {
+        public bool LightMoved { get; set; }
+        private VisibilityComputer visibility;
         private Effect lightEffect;
 
         public Vector2 Position { get; set; }
@@ -33,18 +35,27 @@ namespace Broken_Shadows.Graphics
             Radius = radius;
             Color = color;
             Power = power;
+
+            visibility = new VisibilityComputer(Position, Radius);
         }
 
         public void Render(GraphicsDevice device, IEnumerable<Objects.GameObject> obstacles)
         {
             if (Power > 0)
             {
-                // Compute the visibility mesh
-                var visibility = new VisibilityComputer(Position, Radius);
-                foreach (Objects.GameObject o in obstacles)
+                visibility.Origin = Position;
+                visibility.Radius = Radius;
+
+                if (LightMoved)
                 {
-                    float width = o.Pose.Scale.X * o.Texture.Width;
-                    visibility.AddSquareOccluder(o.Pose.Position, width, o.Pose.Rotation);
+                    visibility.ClearOccluders();
+                    foreach (Objects.GameObject o in obstacles)
+                    {
+                        float width = o.Pose.Scale.X * o.Texture.Width;
+                        visibility.AddSquareOccluder(o.Pose.Position, width, o.Pose.Rotation);
+                    }
+                    //System.Diagnostics.Debug.WriteLine("Refreshed occluders");
+                    LightMoved = false;
                 }
 
                 List<Vector2> encounters = visibility.Compute();
@@ -60,10 +71,10 @@ namespace Broken_Shadows.Graphics
                                           device.PresentationParameters.BackBufferHeight);
 
                 // Apply the effect
-                this.lightEffect.Parameters["lightSource"].SetValue(Position);
-                this.lightEffect.Parameters["lightColor"].SetValue(Color.ToVector3() * Power);
-                this.lightEffect.Parameters["lightRadius"].SetValue(Radius);
-                this.lightEffect.Techniques[0].Passes[0].Apply();
+                lightEffect.Parameters["lightSource"].SetValue(Position);
+                lightEffect.Parameters["lightColor"].SetValue(Color.ToVector3() * Power);
+                lightEffect.Parameters["lightRadius"].SetValue(Radius);
+                lightEffect.Techniques[0].Passes[0].Apply();
 
                 // Draw the light on screen, using the triangle fan from the computed
                 // visibility mesh so that the light only influences the area that can be 
@@ -87,8 +98,6 @@ namespace Broken_Shadows.Graphics
             float halfScreenHeight = screenHeight / 2.0f;
 
             // Computes the screen coordinates from the world coordinates
-            // TODO: this should be done using a proper camera system
-            // using a view-projection matrix in the shader
             for (int i = 0; i < vertices.Length; i++)
             {
                 VertexPositionTexture current = vertices[i];

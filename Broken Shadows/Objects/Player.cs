@@ -63,8 +63,11 @@ namespace Broken_Shadows.Objects
         {
             //UpdateCombatLevel();
             if (Light != null)
+            {
                 Light.Position = Pose.Position;
-            
+                Light.LightMoved = true;
+            }
+
             base.Update(deltaTime);
         }
 
