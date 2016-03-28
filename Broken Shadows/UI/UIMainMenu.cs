@@ -27,7 +27,12 @@ namespace Broken_Shadows.UI
                 buttonFont, Color.White,
                 Color.Purple, NewGame));
 
-            vPos.Y += 100;
+            vPos.Y += 50;
+            buttons.AddLast(new Button(vPos, "ui_map_creator",
+                buttonFont, Color.White,
+                Color.Purple, MapCreator));
+
+            vPos.Y += 50;
             buttons.AddLast(new Button(vPos, "ui_help_title",
                 buttonFont, Color.White,
                 Color.Purple, Help));
@@ -46,6 +51,11 @@ namespace Broken_Shadows.UI
 
         public void Options()
         {
+        }
+
+        public void MapCreator()
+        {
+            StateHandler.Get().SetState(GameState.Creator);
         }
 
         public void Help()

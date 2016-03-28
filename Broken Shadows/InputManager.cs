@@ -15,6 +15,7 @@ namespace Broken_Shadows
     public enum Binding
     {
         UI_Exit = 0,
+        Toggle_FullScreen,
         Pan_Down,
         Pan_Up,
         Pan_Left,
@@ -65,6 +66,7 @@ namespace Broken_Shadows
             bindings = new SortedList<Binding, BindInfo>();
             // UI Bindings
             bindings.Add(Binding.UI_Exit, new BindInfo(Keys.Escape, BindType.JustPressed));
+            bindings.Add(Binding.Toggle_FullScreen, new BindInfo(Keys.F12, BindType.JustPressed));
 
             // Movement Bindings
             bindings.Add(Binding.Pan_Up, new BindInfo(Keys.Up, BindType.Held));

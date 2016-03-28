@@ -5,6 +5,7 @@
   <text id='ui_title'>Broken Shadows</text>
   <text id='ui_new_game'>New Game</text>
   <text id='ui_resume_game'>Resume Game</text>
+  <text id='ui_map_creator'>Map Creator</text>
   <text id='ui_options'>Options</text>
   <text id='ui_shutdown'>Exit</text>
 
@@ -26,6 +27,16 @@
   <text id='ui_quit'>Quit</text>
 
   <!-- Gameplay UI -->
+  
+  <!-- Map Creator UI-->
+  <text id='ui_chooseSize'>New Map Size:</text>
+  <text id='ui_plus'>+</text>
+  <text id='ui_minus'>-</text>
+  <text id='ui_create'>Create Map</text>
+  <text id='ui_blankMap'>New Map</text>
+  <text id='ui_reset'>Reset</text>
+  <text id='ui_resize'>Resize</text>
+  <text id='ui_save'>Save</text>
 
   <!-- Status Messages -->
 

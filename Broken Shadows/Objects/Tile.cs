@@ -20,7 +20,7 @@ namespace Broken_Shadows.Objects
         public Graphics.PointLight Light { get; set; }
         public List<NeighborTile> Neighbors { get; } = new List<NeighborTile>();
 
-        public Tile(Game game, Pose2D pose, string textureName = "Tiles/BlankTile", bool isSpawn = false, bool movementAllowed = false, bool isGoal = false, bool isRigid = true, bool canInteract = false, bool selected = false)
+        public Tile(Game game, Pose2D pose, string textureName = "Tiles/Default", bool isSpawn = false, bool movementAllowed = false, bool isGoal = false, bool isRigid = true, bool canInteract = false, bool selected = false)
             : base(game, textureName, pose)
         {
             IsInteractable = canInteract;

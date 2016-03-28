@@ -13,7 +13,8 @@ namespace Broken_Shadows.Graphics
     public class PointLight
     {
         public bool LightMoved { get; set; }
-        private VisibilityComputer visibility;
+        public VisibilityComputer Visibility { get; private set; }
+        public List<Vector2> Encounters { get; private set; }
         private Effect lightEffect;
 
         public Vector2 Position { get; set; }
@@ -36,29 +37,31 @@ namespace Broken_Shadows.Graphics
             Color = color;
             Power = power;
 
-            visibility = new VisibilityComputer(Position, Radius);
+            Visibility = new VisibilityComputer(Position, Radius);
         }
 
-        public void Render(GraphicsDevice device, IEnumerable<Objects.GameObject> obstacles)
+        public void Render(GraphicsDevice device, Level level, IEnumerable<Objects.GameObject> obstacles)
         {
             if (Power > 0)
             {
-                visibility.Origin = Position;
-                visibility.Radius = Radius;
+                Visibility.Origin = Position;
+                Visibility.Radius = Radius;
 
                 if (LightMoved)
                 {
-                    visibility.ClearOccluders();
+                    Visibility.ClearOccluders();
+                    Visibility.AddLevelOccluders(level);
                     foreach (Objects.GameObject o in obstacles)
                     {
                         float width = o.Pose.Scale.X * o.Texture.Width;
-                        visibility.AddSquareOccluder(o.Pose.Position, width, o.Pose.Rotation);
+                        Visibility.AddSquareOccluder(o.Pose.Position, width, o.Pose.Rotation);
                     }
                     //System.Diagnostics.Debug.WriteLine("Refreshed occluders");
                     LightMoved = false;
                 }
 
-                List<Vector2> encounters = visibility.Compute();
+                List<Vector2> encounters = Visibility.Compute();
+                Encounters = encounters;
 
                 // Generate a triangle list from the encounter points
                 VertexPositionTexture[] vertices;

@@ -14,25 +14,20 @@ namespace Broken_Shadows.Visibility
     /// </summary>
     public class VisibilityComputer
     {
-        // These represent the map and light location:        
-        private List<Endpoint> endpoints;
-        private List<Segment> segments;
+        private static int[][] dirs = { new int[] { 1, 0 }, new int[] { 0, -1 }, new int[] { -1, 0 }, new int[] { 0, 1 } };
+        private static int[] toStep = { 3, 0, 3, 0 };
 
-        /// <summary>
-        /// The origin, or position of the observer
-        /// </summary>
-        public Vector2 Origin { get; set; }
+        private List<Endpoint> endpoints;
+        public List<Segment> Segments { get; private set; }
         
-        /// <summary>
-        /// The maxiumum view distance
-        /// </summary>
+        public Vector2 Origin { get; set; }
         public float Radius { get; set; }
 
         private EndpointComparer radialComparer;
 
         public VisibilityComputer(Vector2 origin, float radius)
         {
-            segments = new List<Segment>();
+            Segments = new List<Segment>();
             endpoints = new List<Endpoint>();
             radialComparer = new EndpointComparer();
 
@@ -71,6 +66,85 @@ namespace Broken_Shadows.Visibility
             AddSegment(corners[3], corners[0]);
         }
 
+        public void AddLevelOccluders(Level level)
+        {
+            List<Segment> segments = new List<Segment>();
+            Vector2 offset = StateHandler.Get().GridPos;
+            int w = level.Width * 2 + 1;
+            int h = level.Height * 2 + 1;
+            bool[] seen = new bool[w * h];
+            for (int x = 0; x < level.Width; x++)
+            {
+                for (int y = 0; y < level.Height; y++)
+                {
+                    if (level.IsWall(x, y))
+                    {
+                        float centerX = x + 0.5f;
+                        float centerY = y + 0.5f;
+                        for (int i = 0; i < dirs.GetLength(0); i++)
+                        {
+                            int[] frntDir = dirs[i];
+                            int[] perpDir = dirs[(i + 1) % dirs.GetLength(0)];
+                            int neighborX = x + frntDir[0];
+                            int neighborY = y + frntDir[1];
+                            if (!level.IsWall(neighborX, neighborY))
+                            {
+                                int faceIndex = (x + 1) * 2 + frntDir[0] + ((y + 1) * 2 + frntDir[1]) * w;
+                                if (!seen[faceIndex])
+                                {
+                                    seen[faceIndex] = true;
+                                    float x1 = centerX + frntDir[0] * 0.5f + perpDir[0] * 0.5f;
+                                    float y1 = centerY + frntDir[1] * 0.5f + perpDir[1] * 0.5f;
+                                    float x2 = centerX + frntDir[0] * 0.5f - perpDir[0] * 0.5f;
+                                    float y2 = centerY + frntDir[1] * 0.5f - perpDir[1] * 0.5f;
+                                    int signX = 1;
+                                    if (x1 > x2)
+                                    {
+                                        float t = x1;
+                                        x1 = x2;
+                                        x2 = t;
+                                        signX = -1;
+                                    }
+                                    int signY = 1;
+                                    if (y1 > y2)
+                                    {
+                                        float t = y1;
+                                        y1 = y2;
+                                        y2 = t;
+                                        signY = -1;
+                                    }
+                                    int stepX = dirs[toStep[i]][0];
+                                    int stepY = dirs[toStep[i]][1];
+                                    int joinX = x;
+                                    int joinY = y;
+                                    while (true)
+                                    {
+                                        joinX += stepX;
+                                        joinY += stepY;
+                                        neighborX = joinX + frntDir[0];
+                                        neighborY = joinY + frntDir[1];
+                                        if (level.IsWall(joinX, joinY) && !level.IsWall(neighborX, neighborY))
+                                        {
+                                            x2 = joinX + 0.5f + frntDir[0] * 0.5f - perpDir[0] * signX * 0.5f;
+                                            y2 = joinY + 0.5f + frntDir[1] * 0.5f - perpDir[1] * signY * 0.5f;
+                                            seen[(joinX + 1) * 2 + frntDir[0] + ((joinY + 1) * 2 + frntDir[1]) * w] = true;
+                                        }
+                                        else {
+                                            break;
+                                        }
+                                    }
+                                    AddSegment(new Vector2(x1 * GlobalDefines.TileSize + offset.X - GlobalDefines.TileSize / 2, 
+                                                           y1 * GlobalDefines.TileSize + offset.Y - GlobalDefines.TileSize / 2), 
+                                               new Vector2(x2 * GlobalDefines.TileSize + offset.X - GlobalDefines.TileSize / 2, 
+                                                           y2 * GlobalDefines.TileSize + offset.Y - GlobalDefines.TileSize / 2));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Add a line shaped occluder
         /// </summary>        
@@ -97,7 +171,7 @@ namespace Broken_Shadows.Visibility
             segment.P1 = endPoint1;
             segment.P2 = endPoint2;
 
-            segments.Add(segment);
+            Segments.Add(segment);
             endpoints.Add(endPoint1);
             endpoints.Add(endPoint2);
         }
@@ -107,7 +181,7 @@ namespace Broken_Shadows.Visibility
         /// </summary>
         public void ClearOccluders()
         {
-            segments.Clear();
+            Segments.Clear();
             endpoints.Clear();
 
             LoadBoundaries();
@@ -139,7 +213,7 @@ namespace Broken_Shadows.Visibility
         // Processes segments so that we can sort them later
         private void UpdateSegments()
         {
-            foreach (Segment segment in segments)
+            foreach (Segment segment in Segments)
             {
                 // NOTE: future optimization: we could record the quadrant
                 // and the y/x or x/y ratio, and sort by (quadrant,
@@ -172,14 +246,13 @@ namespace Broken_Shadows.Visibility
         {
             // NOTE: we slightly shorten the segments so that
             // intersections of the endpoints (common) don't count as
-            // intersections in this algorithm                        
-
-            bool a1 = VectorMath.LeftOf(a.P2.Position, a.P1.Position, VectorMath.Interpolate(b.P1.Position, b.P2.Position, 0.01f));
-            bool a2 = VectorMath.LeftOf(a.P2.Position, a.P1.Position, VectorMath.Interpolate(b.P2.Position, b.P1.Position, 0.01f));
+            // intersections in this algorithm
+            bool a1 = VectorMath.LeftOf(a.P2.Position, a.P1.Position, VectorMath.Interpolate(b.P1.Position, b.P2.Position, 0.1f));
+            bool a2 = VectorMath.LeftOf(a.P2.Position, a.P1.Position, VectorMath.Interpolate(b.P2.Position, b.P1.Position, 0.1f));
             bool a3 = VectorMath.LeftOf(a.P2.Position, a.P1.Position, relativeTo);
 
-            bool b1 = VectorMath.LeftOf(b.P2.Position, b.P1.Position, VectorMath.Interpolate(a.P1.Position, a.P2.Position, 0.01f));
-            bool b2 = VectorMath.LeftOf(b.P2.Position, b.P1.Position, VectorMath.Interpolate(a.P2.Position, a.P1.Position, 0.01f));
+            bool b1 = VectorMath.LeftOf(b.P2.Position, b.P1.Position, VectorMath.Interpolate(a.P1.Position, a.P2.Position, 0.1f));
+            bool b2 = VectorMath.LeftOf(b.P2.Position, b.P1.Position, VectorMath.Interpolate(a.P2.Position, a.P1.Position, 0.1f));
             bool b3 = VectorMath.LeftOf(b.P2.Position, b.P1.Position, relativeTo);
 
             // NOTE: this algorithm is probably worthy of a short article

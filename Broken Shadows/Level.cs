@@ -10,7 +10,7 @@ namespace Broken_Shadows
     {
         private enum TileType
         {
-            Default = 0,
+            Empty = 0,
             Path,
             Wall,
             Spawn,
@@ -21,7 +21,7 @@ namespace Broken_Shadows
         }
 
         private Game game;
-        public Tile[,] Tiles { get; private set; }
+        private Tile[,] Tiles;
         public int Width { get { return Tiles.GetLength(1); } }
         public int Height { get { return Tiles.GetLength(0); } }
         public Tile SpawnTile { get; private set; }
@@ -35,6 +35,8 @@ namespace Broken_Shadows
 
         public Tile Intersects(Point point)
         {
+            if (Tiles == null)
+                return null;
             Tile selected = null;
             Rectangle pointRect = new Rectangle(point, new Point(1));
             foreach (Tile t in Tiles)
@@ -67,6 +69,25 @@ namespace Broken_Shadows
 
             FillTiles(TileData, Tiles, height, width);
             AssignNeighbors(Tiles, height, width);
+        }
+
+        public virtual void LoadLevel()
+        {
+            LevelColor = Color.White;
+            int[,] TileData = new int[Tiles.GetLength(0), Tiles.GetLength(1)];
+
+            Tiles = new Tile[TileData.GetLength(0), TileData.GetLength(1)];
+            FillTiles(TileData, Tiles, Tiles.GetLength(0), Tiles.GetLength(1));
+        }
+
+        public virtual void LoadLevel(int width, int height)
+        {
+            Tiles = null;
+            LevelColor = Color.White;
+            int[,] TileData = new int[height, width];
+
+            Tiles = new Tile[height, width];
+            FillTiles(TileData, Tiles, height, width);
         }
 
         /// <summary>
@@ -128,13 +149,13 @@ namespace Broken_Shadows
         /// <param name="type">The type of the tile.</param>
         /// <param name="isSpawn">Whether the tile is a spawn.</param>
         /// <returns></returns>
-        private Tile CreateTile(Vector2 vPos, TileType type = TileType.Default)
+        private Tile CreateTile(Vector2 vPos, TileType type = TileType.Empty, bool isMap = false)
         {
             Tile Tile = null;
             switch (type)
             {
-                case (TileType.Default):
-                    Tile = new Tile(game, new Pose2D(vPos, 0));
+                case (TileType.Empty):
+                    Tile = new Tile(game, new Pose2D(vPos, 0), "Tiles/Empty");
                     break;
                 case (TileType.Path):
                     Tile = new Tile(game, new Pose2D(vPos, 0), "Tiles/Path", false, true);
@@ -158,7 +179,7 @@ namespace Broken_Shadows
 
             if (Tile != null)
             {
-                StateHandler.Get().SpawnGameObject(Tile, !Tile.AllowsMovement);
+                StateHandler.Get().SpawnGameObject(Tile, !isMap && !Tile.AllowsMovement);
                 if (Tile.Light != null)
                     Graphics.GraphicsManager.Get().AddLight(Tile.Light);
             }
@@ -376,12 +397,16 @@ namespace Broken_Shadows
             AssignNeighbors(Tiles, Tiles.GetLength(0), Tiles.GetLength(1));
         }      
 
-        public bool IsSolid(int x, int y)
+        public bool IsWall(int x, int y)
         {
             if (x >= 0 && x < Width && y >= 0 && y < Height)
-                return (Tiles[y, x] != null) ? Tiles[y, x].AllowsMovement : false;
+            {
+                if (Tiles[y, x] == null)
+                    return false;
+                return !Tiles[y, x].AllowsMovement && Tiles[y, x].Neighbors.Exists(n => n.GetTile.AllowsMovement);
+            }
             else
-                return false;
+                return true;
         }
     }
 }

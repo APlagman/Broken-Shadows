@@ -53,19 +53,19 @@ namespace Broken_Shadows.UI
             base.Update(deltaTime);
         }
 
-        public override void Draw(float deltaTime, SpriteBatch DrawBatch)
+        public override void Draw(float deltaTime, SpriteBatch drawBatch)
         {
             // Draw background
             var g = Graphics.GraphicsManager.Get();
             Rectangle rect = new Rectangle(g.Width / 2 - 200, g.Height / 2 - 125,
                 400, 250);
-            g.DrawFilled(DrawBatch, rect, Color.Black, 4.0f, Color.Purple);
+            g.DrawFilled(drawBatch, rect, new Color(30, 30, 30), 4.0f, Color.Purple);
 
             Vector2 vOffset = Vector2.Zero;
             vOffset.Y -= 75;
-            DrawCenteredString(DrawBatch, pausedText, titleFont, Color.White, vOffset);
+            DrawCenteredString(drawBatch, pausedText, titleFont, Color.White, vOffset);
 
-            base.Draw(deltaTime, DrawBatch);
+            base.Draw(deltaTime, drawBatch);
         }
 
         public override void OnExit()

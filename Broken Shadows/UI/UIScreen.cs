@@ -68,7 +68,7 @@ namespace Broken_Shadows.UI
             }
         }
 
-        public void DrawCenteredString(SpriteBatch DrawBatch, string sText,
+        protected void DrawCenteredString(SpriteBatch DrawBatch, string sText,
             SpriteFont font, Color color, Vector2 vOffset)
         {
             Vector2 pos = new Vector2(Graphics.GraphicsManager.Get().Width / 2.0f, Graphics.GraphicsManager.Get().Height / 2.0f);

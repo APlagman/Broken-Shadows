@@ -9,7 +9,7 @@ namespace Broken_Shadows.Visibility
     /// <summary>
     /// Represents an occluding line segment in the visibility mesh
     /// </summary>
-    internal class Segment
+    public class Segment
     {
         /// <summary>
         /// First and second end-points of the segment
