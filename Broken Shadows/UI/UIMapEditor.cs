@@ -5,12 +5,12 @@ using Microsoft.Xna.Framework.Content;
 
 namespace Broken_Shadows.UI
 {
-    public class UIMapCreator : UIScreen
+    public class UIMapEditor : UIScreen
     {
         private SpriteFont titleFont;
         private SpriteFont buttonFont;
 
-        public UIMapCreator(ContentManager Content) :
+        public UIMapEditor(ContentManager Content) :
             base(Content)
         {
             titleFont = content.Load<SpriteFont>("Fonts/FixedTitle");
@@ -58,7 +58,7 @@ namespace Broken_Shadows.UI
 
         public void Resize()
         {
-            //StateHandler.Get().ResizeMap();
+            StateHandler.Get().ResizeMap();
         }
 
         public void Save()

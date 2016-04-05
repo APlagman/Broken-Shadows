@@ -4,19 +4,16 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Broken_Shadows.UI
 {
-    internal class UIMapResize : UIScreen
+    internal class UIMapCreate : UIScreen
     {
         private SpriteFont titleFont;
         private SpriteFont buttonFont;
         private string sizeText;
-        private int width, height;
-        private bool shiftLeft = false, shiftTop = false;
+        private int width = 10, height = 10;
 
-        public UIMapResize(ContentManager Content, int width, int height) :
+        public UIMapCreate(ContentManager Content) :
             base(Content)
         {
-            this.width = width;
-            this.height = height;
             titleFont = content.Load<SpriteFont>("Fonts/FixedTitle");
             buttonFont = content.Load<SpriteFont>("Fonts/FixedButton");
 
@@ -45,22 +42,16 @@ namespace Broken_Shadows.UI
                 titleFont, Color.White,
                 Color.Purple, RemoveHeight));
 
-            vPos.X -= 100;
+            vPos.X -= 75;
             vPos.Y += 45;
-            buttons.AddLast(new Button(vPos, "ui_toggle_horiz",
+            buttons.AddLast(new Button(vPos, "ui_create",
                 buttonFont, Color.White,
-                Color.Purple, ToggleHorizontal));
+                Color.Purple, Create));
 
             vPos.Y += 30;
-            buttons.AddLast(new Button(vPos, "ui_toggle_vert",
+            buttons.AddLast(new Button(vPos, "ui_quit",
                 buttonFont, Color.White,
-                Color.Purple, ToggleVertical));
-
-            vPos.X += 25;
-            vPos.Y += 30;
-            buttons.AddLast(new Button(vPos, "ui_resize",
-                buttonFont, Color.White,
-                Color.Purple, Resize));
+                Color.Purple, Quit));
         }
 
         #region Button Methods
@@ -88,19 +79,9 @@ namespace Broken_Shadows.UI
                 height--;
         }
 
-        private void ToggleHorizontal()
+        private void Create()
         {
-            shiftLeft = !shiftLeft;
-        }
-
-        private void ToggleVertical()
-        {
-            shiftTop = !shiftTop;
-        }
-
-        private void Resize()
-        {
-            StateHandler.Get().ResizeCurrentMap(width, height, shiftLeft, shiftTop);
+            StateHandler.Get().LoadMap(width, height);
             StateHandler.Get().PopUI();
         }
 
@@ -120,15 +101,10 @@ namespace Broken_Shadows.UI
             // Draw background
             var g = Graphics.GraphicsManager.Get();
             Rectangle rect = new Rectangle(g.Width / 2 - 200, g.Height / 2 - 125,
-                400, 250);
+                400, 200);
             g.DrawFilled(drawBatch, rect, new Color(30, 30, 30), 4.0f, Color.Purple);
 
-            Vector2 vOffset = new Vector2(90, 45);
-            DrawCenteredString(drawBatch, (shiftTop) ? "Top" : "Bottom", titleFont, Color.MonoGameOrange, vOffset);
-            vOffset.Y -= 30;
-            DrawCenteredString(drawBatch, (shiftLeft) ? "Left" : "Right", titleFont, Color.MonoGameOrange, vOffset);
-            vOffset.X -= 90;
-            vOffset.Y -= 44;
+            Vector2 vOffset = new Vector2(0, -29);
             DrawCenteredString(drawBatch, "Height: " + height, titleFont, Color.MonoGameOrange, vOffset);
             vOffset.Y -= 25;
             DrawCenteredString(drawBatch, "Width: " + width, titleFont, Color.MonoGameOrange, vOffset);

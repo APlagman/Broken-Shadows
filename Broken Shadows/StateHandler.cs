@@ -95,10 +95,10 @@ namespace Broken_Shadows
         private void SetupCreator()
         {
             UIStack.Clear();
-            UIStack.Push(new UI.UIMapCreator(game.Content));
+            UIStack.Push(new UI.UIMapEditor(game.Content));
             
             level = new Level(game);
-            UIStack.Push(new UI.UIMapResize(game.Content));
+            UIStack.Push(new UI.UIMapCreate(game.Content));
         }
         #endregion
 
@@ -292,9 +292,19 @@ namespace Broken_Shadows
             gridPos = new Vector2(GlobalDefines.TileSize / 2);
         }
 
+        public void ResizeCurrentMap(int width, int height, bool shiftLeft, bool shiftTop)
+        {
+            ClearGameObjects();
+            selectedTile = null;
+            currentTile = null;
+            level.ResizeLevel(width, height, shiftLeft, shiftTop);
+            Graphics.GraphicsManager.Get().Level = level;
+            gridPos = new Vector2(GlobalDefines.TileSize / 2);
+        }
+
         public void NewMap()
         {
-            UIStack.Push(new UI.UIMapResize(game.Content));
+            UIStack.Push(new UI.UIMapCreate(game.Content));
         }
 
         public void ResetMap()
@@ -304,6 +314,11 @@ namespace Broken_Shadows
             currentTile = null;
             level.LoadLevel();
             gridPos = new Vector2(GlobalDefines.TileSize / 2);
+        }
+
+        public void ResizeMap()
+        {
+            UIStack.Push(new UI.UIMapResize(game.Content, level.Width, level.Height));
         }
 
         #region Object Creation

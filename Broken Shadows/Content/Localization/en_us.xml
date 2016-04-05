@@ -37,6 +37,12 @@
   <text id='ui_reset'>Reset</text>
   <text id='ui_resize'>Resize</text>
   <text id='ui_save'>Save</text>
+  <text id='ui_toggle_horiz'>Crop Horizontally:</text>
+  <text id='ui_toggle_vert'>Crop Vertically:</text>
+  <text id='ui_left'>Left</text>
+  <text id='ui_right'>Right</text>
+  <text id='ui_top'>Top</text>
+  <text id='ui_bottom'>Bottom</text>
 
   <!-- Status Messages -->
 

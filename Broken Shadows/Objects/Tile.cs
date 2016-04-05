@@ -9,6 +9,7 @@ namespace Broken_Shadows.Objects
     {
         private string selectName = "Tiles/Highlight";
         private static Texture2D selectTexture;
+        private Level.TileType type;
 
         public bool AllowsMovement { get; }
         public bool IsInteractable { get; }
@@ -20,7 +21,7 @@ namespace Broken_Shadows.Objects
         public Graphics.PointLight Light { get; set; }
         public List<NeighborTile> Neighbors { get; } = new List<NeighborTile>();
 
-        public Tile(Game game, Pose2D pose, string textureName = "Tiles/Default", bool isSpawn = false, bool movementAllowed = false, bool isGoal = false, bool isRigid = true, bool canInteract = false, bool selected = false)
+        public Tile(Game game, Pose2D pose, Level.TileType type, string textureName = "Tiles/Default", bool isSpawn = false, bool movementAllowed = false, bool isGoal = false, bool isRigid = true, bool canInteract = false, bool selected = false)
             : base(game, textureName, pose)
         {
             IsInteractable = canInteract;
@@ -30,6 +31,7 @@ namespace Broken_Shadows.Objects
             IsRigid = isRigid;
             IsSelected = selected;
 
+            this.type = type;
             TextureName = textureName;
 
             Load();
@@ -68,6 +70,11 @@ namespace Broken_Shadows.Objects
         public void AddNeighbor(Tile t, string direction)
         {
             Neighbors.Add(new NeighborTile(t, (Direction)Enum.Parse(typeof(Direction), direction)));
+        }
+
+        public int ToData()
+        {
+            return (int)type;
         }
     }
 }

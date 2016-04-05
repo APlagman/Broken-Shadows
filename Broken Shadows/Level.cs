@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.IO;
-using System.Xml.Serialization;
+using System;
 using Microsoft.Xna.Framework;
 using Broken_Shadows.Objects;
 
@@ -8,7 +7,7 @@ namespace Broken_Shadows
 {
     public class Level
     {
-        private enum TileType
+        public enum TileType
         {
             Empty = 0,
             Path,
@@ -86,6 +85,44 @@ namespace Broken_Shadows
             LevelColor = Color.White;
             int[,] TileData = new int[height, width];
 
+            TileData[0, 0] = 1;
+            TileData[0, width - 1] = 1;
+            TileData[height - 1, 0] = 1;
+            TileData[height - 1, width - 1] = 1;
+
+            Tiles = new Tile[height, width];
+            FillTiles(TileData, Tiles, height, width);
+        }
+
+        public virtual void ResizeLevel(int width, int height, bool shiftLeft, bool shiftTop)
+        {
+            // Horiz true = left, vert true = top
+            int horizMod = width - Tiles.GetLength(1);
+            int vertMod = height - Tiles.GetLength(0);
+            int[,] TileData = new int[height, width];
+            for (int r = ((shiftTop) ? ((vertMod < 0) ? Math.Abs(vertMod) : 0) : 0); r < Tiles.GetLength(0); r++)
+            {
+                for (int c = ((shiftLeft) ? ((horizMod < 0) ? Math.Abs(horizMod) : 0) : 0); c < Tiles.GetLength(1); c++)
+                {
+                    System.Diagnostics.Debug.Write("TileData: " + ((shiftTop) ? ((vertMod < 0) ? r : r + vertMod) : r) 
+                        + ", " + ((shiftLeft) ? ((horizMod < 0) ? c : c + horizMod) : c)
+                        + " " + "Tile: " + r + ", " + c + " ");
+                    bool copyTile = true;
+                    if ((shiftTop && vertMod > 0 && r + vertMod >= TileData.GetLength(0)) ||
+                       (shiftLeft && horizMod > 0 && c + horizMod >= TileData.GetLength(1)) ||
+                       (!shiftLeft && c >= TileData.GetLength(1)) ||
+                       (!shiftTop && r >= TileData.GetLength(0)))
+                            copyTile = false;
+                    System.Diagnostics.Debug.WriteLine(copyTile);
+                    if (copyTile)
+                    {
+                        TileData[(shiftTop) ? r + vertMod : r, 
+                                 (shiftLeft) ? c + horizMod : c] 
+                            = Tiles[r, c].ToData();
+                    }
+                }
+            }
+
             Tiles = new Tile[height, width];
             FillTiles(TileData, Tiles, height, width);
         }
@@ -155,25 +192,25 @@ namespace Broken_Shadows
             switch (type)
             {
                 case (TileType.Empty):
-                    Tile = new Tile(game, new Pose2D(vPos, 0), "Tiles/Empty");
+                    Tile = new Tile(game, new Pose2D(vPos, 0), type, "Tiles/Empty");
                     break;
                 case (TileType.Path):
-                    Tile = new Tile(game, new Pose2D(vPos, 0), "Tiles/Path", false, true);
+                    Tile = new Tile(game, new Pose2D(vPos, 0), type, "Tiles/Path", false, true);
                     break;
                 case (TileType.Wall):
-                    Tile = new Tile(game, new Pose2D(vPos, 0), "Tiles/Wall");
+                    Tile = new Tile(game, new Pose2D(vPos, 0), type, "Tiles/Wall");
                     break;
                 case (TileType.Spawn):
-                    Tile = new Tile(game, new Pose2D(vPos, 0), "Tiles/Spawn", true, true);
+                    Tile = new Tile(game, new Pose2D(vPos, 0), type, "Tiles/Spawn", true, true);
                     break;
                 case (TileType.Goal):
-                    Tile = new Tile(game, new Pose2D(vPos, 0), "Tiles/Goal", false, true, true);
+                    Tile = new Tile(game, new Pose2D(vPos, 0), type, "Tiles/Goal", false, true, true);
                     break;
                 case (TileType.MoveablePath):
-                    Tile = new Tile(game, new Pose2D(vPos, 0), "Tiles/Moveable", false, true, false, false);
+                    Tile = new Tile(game, new Pose2D(vPos, 0), type, "Tiles/Moveable", false, true, false, false);
                     break;
                 case (TileType.MoveablePath2):
-                    Tile = new Tile(game, new Pose2D(vPos, 0), "Tiles/Moveable2", false, true, false, false);
+                    Tile = new Tile(game, new Pose2D(vPos, 0), type, "Tiles/Moveable2", false, true, false, false);
                     break;
             }
 
