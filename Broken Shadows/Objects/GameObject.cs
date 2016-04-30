@@ -5,7 +5,7 @@ namespace Broken_Shadows.Objects
 {
     public class GameObject
     {
-        protected Game game;
+        public Game Game { get; protected set; }
         
         public Pose2D Pose { get; set; }
         // OriginPosition is relative to (0,0) in case the grid is reset to match how it would look in a file. 
@@ -29,7 +29,7 @@ namespace Broken_Shadows.Objects
         public GameObject(Game game, string texture, Pose2D pose, string glowTexture)
         {
             Enabled = true;
-            this.game = game;
+            Game = game;
             TextureName = texture;
             GlowTextureName = glowTexture;
             Pose = pose;          
@@ -38,8 +38,8 @@ namespace Broken_Shadows.Objects
 
         public virtual void Load()
         {
-            Texture = game.Content.Load<Texture2D>(TextureName);
-            if (GlowTextureName != null) GlowTexture = game.Content.Load<Texture2D>(GlowTextureName);
+            Texture = Game.Content.Load<Texture2D>(TextureName);
+            if (GlowTextureName != null) GlowTexture = Game.Content.Load<Texture2D>(GlowTextureName);
         }
 
         public virtual void Unload()

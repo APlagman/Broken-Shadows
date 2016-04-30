@@ -64,7 +64,7 @@ namespace Broken_Shadows.Objects
         public override void Load()
         {
             base.Load();
-            selectTexture = game.Content.Load<Texture2D>(selectName);
+            selectTexture = Game.Content.Load<Texture2D>(selectName);
         }
 
         public void AddNeighbor(Tile t, string direction)
@@ -75,6 +75,27 @@ namespace Broken_Shadows.Objects
         public int ToData()
         {
             return (int)type;
+        }
+
+        public static string ToTexture(int data)
+        {
+            switch (data)
+            {
+                default: return "Tiles/Empty";
+                case 1: return "Tiles/Path";
+                case 2: return "Tiles/Wall";
+                case 3: return "Tiles/Spawn";
+                case 4: return "Tiles/Goal";
+                case 5: return "Tiles/Moveable";
+            }
+        }
+
+        public bool CanMove(Vector2 dir)
+        {
+            if (IsRigid) return false;
+
+            return Neighbors.FindAll(n => dir.ToAdjacentDirections().Contains(n.Direction)).Count 
+                == Neighbors.FindAll(n => dir.ToAdjacentDirections().Contains(n.Direction) && n.GetTile.AllowsMovement).Count;
         }
     }
 }

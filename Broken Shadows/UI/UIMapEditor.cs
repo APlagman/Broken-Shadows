@@ -44,6 +44,11 @@ namespace Broken_Shadows.UI
             buttons.AddLast(new Button(vPos, "ui_quit",
                 buttonFont, Color.White,
                 Color.Purple, Quit));
+
+            vPos.Y += 100;
+            buttons.AddLast(new Button(vPos, "ui_change_tile",
+                buttonFont, Color.White,
+                Color.Purple, ChangeTile));
         }
 
         public void New()
@@ -63,12 +68,17 @@ namespace Broken_Shadows.UI
 
         public void Save()
         {
-            //StateHandler.Get().SaveMap();
+            StateHandler.Get().SaveMap();
         }
 
         public void Quit()
         {
             StateHandler.Get().SetState(GameState.MainMenu);
+        }
+
+        public void ChangeTile()
+        {
+            StateHandler.Get().ChangeMapTile();
         }
 
         public override void Update(float deltaTime)

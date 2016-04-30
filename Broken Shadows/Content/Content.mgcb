@@ -244,3 +244,8 @@
 /processorParam:TextureFormat=Color
 /build:Tiles/Empty.png
 
+#begin Levels/Level3.xml
+/importer:XmlImporter
+/processor:PassThroughProcessor
+/build:Levels/Level3.xml
+

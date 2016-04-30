@@ -27,6 +27,11 @@ namespace Broken_Shadows
         Move_Up,
         Move_Left,
         Move_Right,
+        Enter,
+        Up,
+        Down,
+        Left,
+        Right,
         NUM_BINDINGS
     }
 
@@ -80,6 +85,11 @@ namespace Broken_Shadows
             bindings.Add(Binding.Move_Left, new BindInfo(Keys.A, BindType.Held));
             bindings.Add(Binding.Move_Down, new BindInfo(Keys.S, BindType.Held));
             bindings.Add(Binding.Move_Right, new BindInfo(Keys.D, BindType.Held));
+            bindings.Add(Binding.Enter, new BindInfo(Keys.Enter, BindType.JustPressed));
+            bindings.Add(Binding.Up, new BindInfo(Keys.Up, BindType.JustPressed));
+            bindings.Add(Binding.Down, new BindInfo(Keys.Down, BindType.JustPressed));
+            bindings.Add(Binding.Left, new BindInfo(Keys.Left, BindType.JustPressed));
+            bindings.Add(Binding.Right, new BindInfo(Keys.Right, BindType.JustPressed));
         }
 
         private SortedList<Binding, BindInfo> activeBinds = new SortedList<Binding, BindInfo>();
@@ -87,7 +97,7 @@ namespace Broken_Shadows
         private KeyboardState prevKey, curKey;
         private Microsoft.Xna.Framework.Input.MouseState prevMouse, curMouse;
         private MouseState mouseState = MouseState.Default;
-        private Point mousePos = Point.Zero;
+        private Point mousePos = Point.Zero, mouseDownPos = Point.Zero;
         public MouseState MouseState { get { return mouseState; } set { mouseState = value; } }
         public Point MousePosition { get { return mousePos; } }
 
@@ -120,6 +130,7 @@ namespace Broken_Shadows
                 {
                     StateHandler.Get().MouseClick(mousePos);
                 }
+                mouseDownPos = curMouse.Position;
             }
         }
 
@@ -185,6 +196,11 @@ namespace Broken_Shadows
         public Point CalculateMousePoint()
         {
             return mousePos;
+        }
+
+        public Rectangle CalculateSelectionBounds()
+        {
+            return new Rectangle(mouseDownPos.X, mouseDownPos.Y, mousePos.X - mouseDownPos.X, mousePos.Y - mouseDownPos.Y);
         }
 
         protected bool JustPressed(ButtonState Previous, ButtonState Current)

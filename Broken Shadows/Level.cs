@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System;
+using System.Xml;
 using Microsoft.Xna.Framework;
 using Broken_Shadows.Objects;
 
@@ -37,13 +38,13 @@ namespace Broken_Shadows
             if (Tiles == null)
                 return null;
             Tile selected = null;
-            Rectangle pointRect = new Rectangle(point, new Point(1));
+            Rectangle selectionRectangle = new Rectangle(point, new Point(1));
             foreach (Tile t in Tiles)
             {
                 if (t != null)
                 {
-                    Rectangle tileRect = new Rectangle(new Point((int)t.Pose.Position.X - t.Texture.Width / 2, (int)t.Pose.Position.Y - t.Texture.Height / 2), new Point((int)GlobalDefines.TileSize));
-                    if (pointRect.Intersects(tileRect))
+                    Rectangle tileRectangle = new Rectangle(new Point((int)t.Pose.Position.X - t.Texture.Width / 2, (int)t.Pose.Position.Y - t.Texture.Height / 2), new Point((int)GlobalDefines.TileSize));
+                    if (selectionRectangle.Intersects(tileRectangle))
                         selected = t;
                 }
             }
@@ -51,6 +52,25 @@ namespace Broken_Shadows
             return selected;
         }
 
+        public Tile[] Intersects(Rectangle selectionRectangle)
+        {
+            if (Tiles == null)
+                return null;
+            List<Tile> selected = new List<Tile>();
+            foreach (Tile t in Tiles)
+            {
+                if (t != null)
+                {
+                    Rectangle tileRectangle = new Rectangle(new Point((int)t.Pose.Position.X - t.Texture.Width / 2, (int)t.Pose.Position.Y - t.Texture.Height / 2), new Point((int)GlobalDefines.TileSize));
+                    if (selectionRectangle.Intersects(tileRectangle))
+                        selected.Add(t);
+                }
+            }
+
+            return selected.ToArray();
+        }
+
+        #region Level Loading
         /// <summary>
         /// Creates an array of tiles from level data and assigns neighbors.
         /// </summary>
@@ -186,7 +206,12 @@ namespace Broken_Shadows
         /// <param name="type">The type of the tile.</param>
         /// <param name="isSpawn">Whether the tile is a spawn.</param>
         /// <returns></returns>
-        private Tile CreateTile(Vector2 vPos, TileType type = TileType.Empty, bool isMap = false)
+        public Tile CreateTile(Vector2 vPos, TileType type = TileType.Empty, bool isMap = false)
+        {
+            return CreateTile(game, vPos, type, isMap);
+        }
+
+        public static Tile CreateTile(Game game, Vector2 vPos, TileType type = TileType.Empty, bool isMap = false)
         {
             Tile Tile = null;
             switch (type)
@@ -223,7 +248,7 @@ namespace Broken_Shadows
 
             return Tile;
         }
-    
+
         /// <summary>
         /// Loops through the Tile array and assigns neighbors depending on position.
         /// </summary>
@@ -273,7 +298,9 @@ namespace Broken_Shadows
                 }
             }
         }
+        #endregion
 
+        #region Tile Movement
         /// <summary>
         /// Based on the player's movement direction, checks moveable Tiles and moves them if possible.
         /// </summary>
@@ -284,47 +311,22 @@ namespace Broken_Shadows
             if (vDir == Vector2.Zero)
                 return false;
             bool shifted = false;
-            bool keepChecking = false;
+            bool keepChecking = true;
             do
             {         
-                Direction direction = GetDirection(vDir);
+                Direction direction = vDir.ToDirection();
                 System.Diagnostics.Debug.WriteLine("Checking tiles to the " + direction);
                 List<Tile> movingTiles = FindMoving(direction);
                 if (movingTiles.Count > 0)
                 {
                     shifted = true;
-                    keepChecking = MoreTilesToMove(direction);
                     SwapTiles(movingTiles, vDir);
                     ReassignNeighbors();
                 }
+                else
+                    keepChecking = false;
             } while (keepChecking);
-            System.Diagnostics.Debug.WriteLine("");
             return shifted;
-        }
-
-        /// <summary>
-        /// Returns a Direction enum value based on a 2D vector.
-        /// </summary>
-        /// <param name="vDir"></param>
-        /// <returns></returns>
-        private Direction GetDirection(Vector2 vDir)
-        {
-            if (vDir.X == 1 && vDir.Y == 0)
-                return Direction.East;
-            else if (vDir.X == -1 && vDir.Y == 0)
-                return Direction.West;
-            else if (vDir.X == 0 && vDir.Y == 1)
-                return Direction.South;
-            else if (vDir.X == 0 && vDir.Y == -1)
-                return Direction.North;
-            else if (vDir.X == 1 && vDir.Y == -1)
-                return Direction.NorthEast;
-            else if (vDir.X == -1 && vDir.Y == -1)
-                return Direction.NorthWest;
-            else if (vDir.X == 1 && vDir.Y == 1)
-                return Direction.SouthEast;
-            else
-                return Direction.SouthWest;
         }
 
         /// <summary>
@@ -348,45 +350,12 @@ namespace Broken_Shadows
                     {
                         t.IsMoving = true;
                         moving.Add(t);
-                        System.Diagnostics.Debug.WriteLine(t.OriginPosition);
+                        System.Diagnostics.Debug.WriteLine(t.OriginPosition + " is moving.");
                     }
                 }
             }
 
             return moving;
-        }
-
-        /// <summary>
-        /// Returns true if any currently non-moving Tiles are moveable and have moving neighbors.
-        /// This allows ShiftTiles() to repeat the movement process if needed.
-        /// </summary>
-        /// <param name="direction"></param>
-        /// <returns></returns>
-        private bool MoreTilesToMove(Direction direction)
-        {
-            foreach (Tile t in Tiles)
-            {
-                if (t != null && !t.IsRigid)
-                {
-                    foreach (NeighborTile n in t.Neighbors)
-                    {
-                        if (n.Direction == direction && !n.GetTile.IsRigid)
-                        {
-                            System.Diagnostics.Debug.WriteLine(t.OriginPosition + " " + direction + " " + n.GetTile.OriginPosition);
-                            bool canMove = true;
-                            foreach (NeighborTile nt in n.GetTile.Neighbors)
-                            {
-                                if (nt.Direction == direction)
-                                    canMove = false;
-                            }
-                            if (canMove)
-                                return true;
-                        }
-                    }
-                }            
-            }
-
-            return false;
         }
 
         /// <summary>
@@ -432,7 +401,9 @@ namespace Broken_Shadows
                 }
             }
             AssignNeighbors(Tiles, Tiles.GetLength(0), Tiles.GetLength(1));
-        }      
+        }
+        
+        #endregion
 
         public bool IsWall(int x, int y)
         {
@@ -445,5 +416,62 @@ namespace Broken_Shadows
             else
                 return true;
         }
+
+        public void ChangeSelected(Tile selectedTile)
+        {
+            for (int r = 0; r < Tiles.GetLength(0); r++)
+            {
+                for (int c = 0; c < Tiles.GetLength(1); c++)
+                {
+                    if (Tiles[r, c].IsSelected && Tiles[r, c].OriginPosition.Equals(selectedTile.OriginPosition))
+                    {
+                        Tiles[r, c] = selectedTile;
+                    }
+                }
+            }
+        }
+
+        #region XML
+        public void WriteToXml()
+        {
+            XmlWriter writer = XmlWriter.Create(@"Custom.xml");
+            writer.WriteStartDocument();
+
+            writer.WriteStartElement("XnaContent");
+            writer.WriteStartElement("Asset");
+            writer.WriteAttributeString("Type", "Broken_Shadows.LevelData");
+            writer.WriteElementString("Width", Width.ToString());
+            writer.WriteElementString("Height", Height.ToString());
+            writer.WriteElementString("Layout", LayoutString());
+            writer.WriteElementString("RGBA", ColorString());
+            writer.WriteEndElement();
+            writer.WriteEndElement();
+
+            writer.WriteEndDocument();
+            writer.Close();
+        }
+
+        private string LayoutString()
+        {
+            string str = "\n";
+
+            for (int r = 0; r < Tiles.GetLength(0); r++)
+            {
+                str += "\t";
+                for (int c = 0; c < Tiles.GetLength(1); c++)
+                {
+                    str += ((Tiles[r, c].ToData() == 0) ? -1 : Tiles[r, c].ToData()) + " ";
+                }
+                str += "\n";
+            }
+
+            return str;
+        }
+
+        private string ColorString()
+        {
+            return LevelColor.R + " " + LevelColor.G + " " + LevelColor.B + " " + LevelColor.A;
+        }
+        #endregion
     }
 }

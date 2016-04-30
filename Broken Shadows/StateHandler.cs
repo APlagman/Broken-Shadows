@@ -3,6 +3,7 @@ using System.Linq;
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Broken_Shadows.Objects;
 
 namespace Broken_Shadows
 {
@@ -24,14 +25,14 @@ namespace Broken_Shadows
         private bool paused;
         private bool helpViewed;
 
-        private LinkedList<Objects.GameObject> gameObjects = new LinkedList<Objects.GameObject>();
-        private List<Objects.Entity> creatures = new List<Objects.Entity>();
-        private List<Objects.Player> players = new List<Objects.Player>();
+        private LinkedList<GameObject> gameObjects = new LinkedList<GameObject>();
+        private List<Entity> creatures = new List<Entity>();
+        private List<Player> players = new List<Player>();
 
         // For Tile / Player overworld movement and selection.
         private Level level;
         private int levelID;
-        private Objects.Tile currentTile, selectedTile;
+        private Tile[] currentTiles, selectedTiles;
         private Vector2 gridPos;
         public Vector2 GridPos { get { return gridPos; } }
         private Vector2 inputDir, playerDir, prevDir, inputFramesLeft, playerFramesLeft;
@@ -149,21 +150,25 @@ namespace Broken_Shadows
             }
         }
 
+        /// <summary>
+        /// Update helper. Updates tile selection on the map creation interface.
+        /// </summary>
+        /// <param name="deltaTime"></param>
         private void UpdateCreator(float deltaTime)
         {
             UpdateTiles(deltaTime);
 
             // Use mouse picking to select the appropriate tile.
-            Point point = InputManager.Get().CalculateMousePoint();
-            currentTile = level.Intersects(point);
+            Rectangle selectionBounds = InputManager.Get().CalculateSelectionBounds();
+            currentTiles = level.Intersects(selectionBounds);
         }
 
         /// <summary>
+        /// Update helper.
         /// Reduces input/player frames and sets the vector representing the player's movement.
         /// Input frames allow a slight delay in order to help with diagonal input before moving the player.
         /// Also refreshes the player's previous move direction.
         /// </summary>
-        /// <returns>True if any Tiles have been </returns>
         private void UpdateFrames()
         {
             bool checkTiles = false;
@@ -200,22 +205,33 @@ namespace Broken_Shadows
                 if (playerFramesLeft.Y < 0 && inputFramesLeft.Y < 0)
                     inputDir.Y = 0;
             }
+
             playerDir = new Vector2((playerFramesLeft.X >= 0) ? inputDir.X : 0, (playerFramesLeft.Y >= 0) ? inputDir.Y : 0);
             if (playerDir != Vector2.Zero)
+            {
                 prevDir = playerDir;
-            if (checkTiles && players.First().HasLegalNeighbor(playerDir))
-                level.ShiftTiles(playerDir);
+                if (checkTiles && players.First().HasLegalNeighbor(playerDir))
+                {
+                    System.Diagnostics.Debug.WriteLine("Player Starting Position: " + players.First().OriginPosition);
+                    level.ShiftTiles(playerDir);
+                }
+            }
         }
 
+        /// <summary>
+        /// Update helper.
+        /// Moves any non-rigid tiles with valid adjacent spots in the same direction as the player.
+        /// </summary>
+        /// <param name="deltaTime"></param>
         private void UpdateTiles(float deltaTime)
         {
-            foreach (Objects.GameObject o in gameObjects)
+            foreach (GameObject o in gameObjects)
             {
                 if (o.Enabled)
                 {
                     if (o.GetType().Name.Equals("Tile"))
                     {
-                        var t = (Objects.Tile)o;
+                        var t = (Tile)o;
                         if (playerDir == Vector2.Zero)
                             t.IsMoving = false;
                         if (t.IsMoving)
@@ -231,22 +247,32 @@ namespace Broken_Shadows
             }
         }
 
+        /// <summary>
+        /// Update helper.
+        /// Moves the player's absolute and screen positions appropriately and updates the player's current tile. 
+        /// Also checks if the player has reached the goal.
+        /// </summary>
+        /// <param name="deltaTime"></param>
         private void UpdatePlayers(float deltaTime)
         {
-            foreach (Objects.Player player in players)
+            foreach (Player player in players)
             {
                 if (gridIsMoving)
                 {
                     player.Pose.Position = player.CurrentTile.Pose.Position;
                 }
-                if (player.HasLegalNeighbor(playerDir))
+                if (playerDir != Vector2.Zero && player.HasLegalNeighbor(playerDir) || player.CurrentTile.IsMoving)
                 {
                     player.OriginPosition += playerDir * GlobalDefines.TileStepSize;
                     player.Pose.Position = player.OriginPosition + gridPos;
                     if (centerPlayer) // Both OriginPosition and gridPos have moved, so the player is one step off-center.
                         player.Pose.Position -= playerDir * GlobalDefines.TileStepSize;
                     if (playerFramesLeft.X <= 0 && playerFramesLeft.Y <= 0)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Player Ending Position: " + players.First().OriginPosition);
+                        System.Diagnostics.Debug.WriteLine("");
                         player.CurrentTile = level.Intersects(player.Pose.Position.ToPoint());
+                    }
                 }
                 if (player.CurrentTile.Equals(level.GoalTile))
                 {
@@ -264,29 +290,31 @@ namespace Broken_Shadows
             inputDir = playerDir = prevDir = Vector2.Zero;
             inputFramesLeft = playerFramesLeft = new Vector2(-1);
 
-            selectedTile = null;
-            currentTile = null;
+            selectedTiles = null;
+            currentTiles = null;
 
             level.LoadLevel("Levels/Level" + ((loadNext) ? ++levelID : levelID));
 
             Graphics.GraphicsManager.Get().Level = level;
 
-            players.Add(new Objects.Player(game));
-            foreach (Objects.Player player in players)
+            players.Add(new Player(game));
+            foreach (Player player in players)
             {
                 player.CurrentTile = level.SpawnTile;
                 player.OriginPosition = player.Pose.Position = player.CurrentTile.OriginPosition;
+                player.Pose.Position = player.OriginPosition + gridPos;
                 Graphics.GraphicsManager.Get().AddPlayerObject(player);
                 Graphics.GraphicsManager.Get().AddLight(player.Light);
             }
             Graphics.GraphicsManager.Get().RenderLights = false;
         }
 
+        #region Map Editor
         public void LoadMap(int width, int height)
         {
             ClearGameObjects();
-            selectedTile = null;
-            currentTile = null;
+            selectedTiles = null;
+            currentTiles = null;
             level.LoadLevel(width, height);
             Graphics.GraphicsManager.Get().Level = level;
             gridPos = new Vector2(GlobalDefines.TileSize / 2);
@@ -295,8 +323,8 @@ namespace Broken_Shadows
         public void ResizeCurrentMap(int width, int height, bool shiftLeft, bool shiftTop)
         {
             ClearGameObjects();
-            selectedTile = null;
-            currentTile = null;
+            selectedTiles = null;
+            currentTiles = null;
             level.ResizeLevel(width, height, shiftLeft, shiftTop);
             Graphics.GraphicsManager.Get().Level = level;
             gridPos = new Vector2(GlobalDefines.TileSize / 2);
@@ -310,8 +338,8 @@ namespace Broken_Shadows
         public void ResetMap()
         {
             ClearGameObjects();
-            selectedTile = null;
-            currentTile = null;
+            selectedTiles = null;
+            currentTiles = null;
             level.LoadLevel();
             gridPos = new Vector2(GlobalDefines.TileSize / 2);
         }
@@ -320,6 +348,26 @@ namespace Broken_Shadows
         {
             UIStack.Push(new UI.UIMapResize(game.Content, level.Width, level.Height));
         }
+
+        public void ChangeMapTile()
+        {
+            if (selectedTiles != null && selectedTiles.Length > 0)
+            {
+                UIStack.Push(new UI.UIMapTileChange(game.Content, selectedTiles));
+                paused = true;
+            }
+        }
+
+        public void ChangeSelected(Tile selectedTile)
+        {
+            level.ChangeSelected(selectedTile);
+        }
+
+        public void SaveMap()
+        {
+            level.WriteToXml();
+        }
+        #endregion
 
         #region Object Creation
         public void SpawnGameObject(Objects.GameObject o, bool isSolid = false)
@@ -368,18 +416,23 @@ namespace Broken_Shadows
         #endregion
 
         #region Input
-        private void SetSelected(Objects.Tile t)
+        private void SetSelected(Tile[] newTiles)
         {
-            if (selectedTile != null)
+            if (selectedTiles != null)
             {
-                selectedTile.IsSelected = false;
+                foreach (Tile ti in selectedTiles)
+                {
+                    if (ti != null)
+                        ti.IsSelected = false;
+                }
             }
 
-            selectedTile = t;
+            selectedTiles = newTiles;
 
-            if (selectedTile != null)
+            if (selectedTiles != null)
             {
-                selectedTile.IsSelected = true;
+                foreach (Tile ti in selectedTiles)
+                    ti.IsSelected = true;
             }
         }
 
@@ -387,9 +440,15 @@ namespace Broken_Shadows
         {
             if (state == GameState.Creator && !paused)
             {
-                if (currentTile != selectedTile)
+                if ((currentTiles == null && selectedTiles != null) || 
+                    (currentTiles != null && selectedTiles == null) || 
+                    (currentTiles != null && selectedTiles != null && !currentTiles.Equals(selectedTiles)))
                 {
-                    SetSelected(currentTile);
+                    SetSelected(currentTiles);
+                }
+                else
+                {
+                    ChangeMapTile();
                 }
             }
         }
@@ -404,6 +463,31 @@ namespace Broken_Shadows
             {
                 Graphics.GraphicsManager.Get().ToggleFullScreen();
             }
+
+            #region Map Editor Keybinds
+            if (state == GameState.Creator)
+            {
+                if (binds.ContainsKey(Binding.Enter))
+                {
+                    if (!paused)
+                        ChangeMapTile();
+                    else
+                    {
+                        ((UI.UIMapTileChange)UIStack.Peek()).Change();
+                    }
+                }
+                if ((binds.ContainsKey(Binding.Up) || binds.ContainsKey(Binding.Left)) && paused)
+                {
+                    ((UI.UIMapTileChange)UIStack.Peek()).Add();
+                }
+                if ((binds.ContainsKey(Binding.Down) || binds.ContainsKey(Binding.Right)) && paused)
+                {
+                    ((UI.UIMapTileChange)UIStack.Peek()).Subtract();
+                }
+            }
+            #endregion
+
+            #region Grid Pan Keybinds
             if (state == GameState.OverWorld || state == GameState.Creator && !paused)
             {
                 gridIsMoving = false;
@@ -433,6 +517,9 @@ namespace Broken_Shadows
                     gridIsMoving = true;
                 }
             }
+            #endregion
+
+            #region OverWorld Keybinds
             if (state == GameState.OverWorld && !paused)
             {
                 if (binds.ContainsKey(Binding.Toggle_Center_Player))
@@ -520,6 +607,7 @@ namespace Broken_Shadows
                     }
                 }
             }
+            #endregion
         }
         #endregion
 

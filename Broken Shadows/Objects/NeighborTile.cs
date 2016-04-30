@@ -1,11 +1,14 @@
 ﻿/**
 * Used for checking legal player movement - contains a tile object and a direction enum.
 */
+using Microsoft.Xna.Framework;
+
 namespace Broken_Shadows.Objects
 {
     public enum Direction
     {
-        North = 0,
+        None = 0,
+        North,
         South,
         West,
         East,
