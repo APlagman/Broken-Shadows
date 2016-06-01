@@ -23,6 +23,25 @@ namespace Broken_Shadows.Visibility
             P2 = null;
         }
 
+        public override bool Equals(object obj)
+        {
+            if (obj is Segment)
+            {
+                Segment other = (Segment)obj;
+
+                return P1.Equals(other.P1) &&
+                        P2.Equals(other.P2);
+            }
+
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return P1.GetHashCode() +
+                    P2.GetHashCode();
+        }
+
         public override string ToString()
         {
             return "{" + P1.Position.ToString() + ", " + P2.Position.ToString() + "}";

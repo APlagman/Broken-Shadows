@@ -97,7 +97,7 @@ namespace Broken_Shadows
         private KeyboardState prevKey, curKey;
         private Microsoft.Xna.Framework.Input.MouseState prevMouse, curMouse;
         private MouseState mouseState = MouseState.Default;
-        private Point mousePos = Point.Zero, mouseDownPos = Point.Zero;
+        private Point mousePos = Point.Zero, mouseDownPos = Point.Zero, mouseUpPos = Point.Zero;
         public MouseState MouseState { get { return mouseState; } set { mouseState = value; } }
         public Point MousePosition { get { return mousePos; } }
 
@@ -124,13 +124,19 @@ namespace Broken_Shadows
             // Check for click
             if (JustPressed(prevMouse.LeftButton, curMouse.LeftButton))
             {
+                mouseDownPos = curMouse.Position;
+            }
+            // Check for release
+            if (prevMouse.LeftButton == ButtonState.Pressed && curMouse.LeftButton == ButtonState.Released)
+            {
+                mouseUpPos = curMouse.Position;
+
                 // If the UI doesn't handle it, send it to GameState
                 if (StateHandler.Get().UICount == 0 ||
                     !StateHandler.Get().GetCurrentUI().MouseClick(mousePos))
                 {
                     StateHandler.Get().MouseClick(mousePos);
                 }
-                mouseDownPos = curMouse.Position;
             }
         }
 
@@ -200,7 +206,19 @@ namespace Broken_Shadows
 
         public Rectangle CalculateSelectionBounds()
         {
-            return new Rectangle(mouseDownPos.X, mouseDownPos.Y, mousePos.X - mouseDownPos.X, mousePos.Y - mouseDownPos.Y);
+            int deltaX = mouseUpPos.X - mouseDownPos.X;
+            int deltaY = mouseUpPos.Y - mouseDownPos.Y;
+            int width = Math.Abs(deltaX);
+            int height = Math.Abs(deltaY);
+
+            if (deltaX >= 0 && deltaY >= 0)
+                return new Rectangle(mouseDownPos.X, mouseDownPos.Y, width, height);
+            else if (deltaX >= 0)
+                return new Rectangle(mouseDownPos.X, mouseDownPos.Y - height, width, height);
+            else if (deltaY >= 0)
+                return new Rectangle(mouseDownPos.X - width, mouseDownPos.Y, width, height);
+            else
+                return new Rectangle(mouseDownPos.X - width, mouseDownPos.Y - height, width, height);
         }
 
         protected bool JustPressed(ButtonState Previous, ButtonState Current)

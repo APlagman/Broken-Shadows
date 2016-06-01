@@ -10,7 +10,7 @@ namespace Broken_Shadows.Visibility
         /// </summary>        
         public static Vector2 LineLineIntersection(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4)
         {
-            // From http://paulbourke.net/geometry/lineline2d/
+            // From http://paulbourke.net/geometry/pointlineplane/
             var s = ((p4.X - p3.X) * (p1.Y - p3.Y) - (p4.Y - p3.Y) * (p1.X - p3.X))
                     / ((p4.Y - p3.Y) * (p2.X - p1.X) - (p4.X - p3.X) * (p2.Y - p1.Y));
             return new Vector2(p1.X + s * (p2.X - p1.X), p1.Y + s * (p2.Y - p1.Y));
@@ -21,10 +21,9 @@ namespace Broken_Shadows.Visibility
         /// </summary>        
         public static bool LeftOf(Vector2 p1, Vector2 p2, Vector2 point)
         {
-            float cross = (p2.X - p1.X) * (point.Y - p1.Y)
-                        - (p2.Y - p1.Y) * (point.X - p1.X);
-
-            return cross < 0;
+            float slope = (p2.Y - p1.Y) / (p2.X - p1.X);
+            float testX = (point.Y - p1.Y) / slope + p1.X;
+            return point.X < testX;
         }
 
         /// <summary>

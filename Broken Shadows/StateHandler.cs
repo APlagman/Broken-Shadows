@@ -85,7 +85,7 @@ namespace Broken_Shadows
 
             paused = false;
             level = new Level(game);
-            levelID = 1;
+            levelID = GlobalDefines.StartLevel;
             LoadLevel();
 
             gridPos = new Vector2(GlobalDefines.WindowWidth / 2 - GlobalDefines.TileSize / 2, GlobalDefines.WindowHeight / 2 - GlobalDefines.TileSize) - players.First().OriginPosition;
@@ -158,9 +158,13 @@ namespace Broken_Shadows
         {
             UpdateTiles(deltaTime);
 
-            // Use mouse picking to select the appropriate tile.
-            Rectangle selectionBounds = InputManager.Get().CalculateSelectionBounds();
-            currentTiles = level.Intersects(selectionBounds);
+            if (!paused && 
+                ((currentTiles == null && selectedTiles != null) ||
+                (currentTiles != null && selectedTiles == null) ||
+                (currentTiles != null && selectedTiles != null && !currentTiles.Equals(selectedTiles))))
+            {
+                SetSelected(currentTiles);
+            }
         }
 
         /// <summary>
@@ -440,16 +444,9 @@ namespace Broken_Shadows
         {
             if (state == GameState.Creator && !paused)
             {
-                if ((currentTiles == null && selectedTiles != null) || 
-                    (currentTiles != null && selectedTiles == null) || 
-                    (currentTiles != null && selectedTiles != null && !currentTiles.Equals(selectedTiles)))
-                {
-                    SetSelected(currentTiles);
-                }
-                else
-                {
-                    ChangeMapTile();
-                }
+                // Use mouse picking to select the appropriate tile(s).
+                Rectangle selectionBounds = InputManager.Get().CalculateSelectionBounds();
+                currentTiles = level.Intersects(selectionBounds);
             }
         }
 
@@ -459,7 +456,7 @@ namespace Broken_Shadows
         /// <param name="binds"></param>
         public void KeyboardInput(SortedList<Binding, BindInfo> binds)
         {
-            if (binds.ContainsKey(Binding.Toggle_FullScreen))
+            if (binds.ContainsKey(Binding.Toggle_FullScreen) && state != GameState.Creator)
             {
                 Graphics.GraphicsManager.Get().ToggleFullScreen();
             }

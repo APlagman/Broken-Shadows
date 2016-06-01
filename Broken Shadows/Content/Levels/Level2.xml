@@ -17,7 +17,7 @@
 			 2 2 2 2 2 2 2 2 2 2 2 2 -1
 		</Layout>
 		<RGBA>
-			147 112 219 255
+			147 112 219 0
 		</RGBA>
 	</Asset>
 </XnaContent>

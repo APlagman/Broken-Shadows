@@ -78,7 +78,17 @@ namespace Broken_Shadows
         public virtual void LoadLevel(string levelName)
         {
             Tiles = null;
-            LevelData lData = game.Content.Load<LevelData>(levelName);
+            LevelData lData;
+            try
+            {
+                lData = game.Content.Load<LevelData>(levelName);
+            }
+            catch (Microsoft.Xna.Framework.Content.ContentLoadException)
+            {
+                System.Diagnostics.Debug.WriteLine("*****Level loading failed, returning to main menu.");
+                StateHandler.Get().SetState(GameState.MainMenu);
+                return;
+            }
             LevelColor = new Color(lData.RGBA[0], lData.RGBA[1], lData.RGBA[2], lData.RGBA[3]);
             int height = lData.Height;
             int width = lData.Width;

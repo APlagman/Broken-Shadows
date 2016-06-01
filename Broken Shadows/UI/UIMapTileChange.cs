@@ -65,14 +65,19 @@ namespace Broken_Shadows.UI
         {
             for (int t = 0; t < selectedTiles.Length; t++)
             {
-                Vector2 tempO = new Vector2(selectedTiles[t].OriginPosition.X, selectedTiles[t].OriginPosition.Y);
-                Pose2D temp = new Pose2D(selectedTiles[t].Pose.Position);
-                Graphics.GraphicsManager.Get().RemoveGameObject(selectedTiles[t]);
-                selectedTiles[t] = Level.CreateTile(selectedTiles[t].Game, Vector2.Zero, (Level.TileType)data, true);
-                selectedTiles[t].IsSelected = true;
-                selectedTiles[t].Pose = temp;
-                selectedTiles[t].OriginPosition = tempO;
-                StateHandler.Get().ChangeSelected(selectedTiles[t]);
+                Vector2 tempOrigin = new Vector2(selectedTiles[t].OriginPosition.X, selectedTiles[t].OriginPosition.Y);
+                Pose2D tempPose = new Pose2D(selectedTiles[t].Pose.Position);
+                Tile newTile = Level.CreateTile(selectedTiles[t].Game, Vector2.Zero, (Level.TileType)data, true);
+
+                if (newTile != null)
+                {
+                    Graphics.GraphicsManager.Get().RemoveGameObject(selectedTiles[t]);
+                    selectedTiles[t] = newTile;
+                    selectedTiles[t].IsSelected = true;
+                    selectedTiles[t].Pose = tempPose;
+                    selectedTiles[t].OriginPosition = tempOrigin;
+                    StateHandler.Get().ChangeSelected(selectedTiles[t]);
+                }
             }
             Back();
         }
@@ -101,10 +106,10 @@ namespace Broken_Shadows.UI
             vOffset.Y += 50;
             DrawCenteredString(drawBatch, data.ToString(), buttonFont, Color.White, vOffset);
             
-            Tile preview = new Tile(selectedTiles[0].Game, new Pose2D(new Vector2(870, 900)), (Level.TileType)data, Tile.ToTexture(data));
+            Tile preview = new Tile(selectedTiles[0].Game, new Pose2D(new Vector2(g.Width + 96, g.Height + 16)), (Level.TileType)data, Tile.ToTexture(data));
             preview.Draw(drawBatch, 0, preview.Pose.Position, 0.5f, SpriteEffects.None, 0);
 
-            vOffset.Y += 50;
+            vOffset.Y += 100;
             DrawCenteredString(drawBatch, preview.TextureName, buttonFont, Color.White, vOffset);
 
             base.Draw(deltaTime, drawBatch);

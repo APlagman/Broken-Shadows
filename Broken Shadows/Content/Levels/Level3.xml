@@ -15,6 +15,6 @@
 		2 2 2 2 2 2 2 2 2 2 
 		2 2 2 2 2 2 2 2 2 2 
 	</Layout>
-	<RGBA>255 255 255 255</RGBA>
+	<RGBA>255 255 255 0</RGBA>
 	</Asset>
 </XnaContent>

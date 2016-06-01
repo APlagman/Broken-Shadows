@@ -188,7 +188,7 @@ namespace Broken_Shadows.Graphics
             GraphicsDevice.Clear(Color.White * ((RenderLights) ? ambientLightStrength : 0));
 
             // Draw normal object that emit light
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.Default);
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.Default, RasterizerState.CullCounterClockwise);
 
             foreach (GameObject o in objects)
             {

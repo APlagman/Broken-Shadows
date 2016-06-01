@@ -2,25 +2,26 @@
 {
     public class GlobalDefines
     {
-        public static int WindowWidth = 896;
-        public static int WindowHeight = 832;
-        public static int MouseCursorSize = 32;
+        // Graphics
+        public static readonly int WindowWidth = 1216; // Default 896.
+        public static readonly int WindowHeight = 832; // Default 832.
+        public static readonly int MouseCursorSize = 32; // Default 32.
+        public static bool VSync = true;  // Default true.
+        public static bool IsFullscreen = false;  // Default false.
+        public static readonly int Fps = 60; // Default 60.
+        public static readonly int MaxFpsSamples = 100; // Default 100.
 
-        public static int MovementFrames = 8;
-        public static float TileSize = 64;
-        public static float PlayerSize = 52;
-        public static float PlayerOffset = (TileSize - PlayerSize) / 2;
-        public static int GridSize = 11;
-        public static float TileStepSize = TileSize / MovementFrames;
-        public static float GridStepSize = TileStepSize / 1.75f;
-        // How many frames to wait for input before moving (allows for easier diagonal movement).
-        public static int InputDelayFrames = 2;
+        // Grid Setup
+        public static readonly int MovementFrames = 8; // Default 8.
+        public static readonly float TileSize = 64; // Default 64.
+        public static readonly float PlayerSize = 52; // Default 52.
+        public static readonly float TileStepSize = TileSize / MovementFrames;
+        public static readonly float GridStepSize = TileStepSize / 1.75f;
+        public static readonly int InputDelayFrames = 2; // Default 2. Used for diagonal movement input.
 
         public static readonly string DefaultLocFile = "Content/Localization/en_us.xml";
 
-        public static bool VSync = true;
-        public static bool IsFullscreen = false;
-        public static int Fps = 60;
-        public static int MaxFpsSamples = 100;
+        // Game Tweaks
+        public static readonly int StartLevel = 1; // Default 1.
     }
 }

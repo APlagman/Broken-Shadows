@@ -7,8 +7,8 @@
         public static bool ShowBuildString = true;
         public static bool ShowWindowsMouseCursor = false;
         public static bool ShowGridAndPlayerPositions = false;
-        public static bool DrawSegments = false;
+        public static bool DrawSegments = true;
         public static bool DrawVertices = false;
-        public static bool DrawTriangles = false;
+        public static bool DrawTriangles = true;
     }
 }
