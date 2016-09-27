@@ -274,35 +274,35 @@ namespace Broken_Shadows
                     {
                         if (c + 1 < width && tiles[r,c + 1] != null)
                         {
-                            tiles[r,c].AddNeighbor(tiles[r,c + 1], "East");
+                            tiles[r,c].AddNeighbor(tiles[r,c + 1], Direction.East);
                         }
                         if (c - 1 >= 0 && tiles[r,c - 1] != null)
                         {
-                            tiles[r,c].AddNeighbor(tiles[r,c - 1], "West");
+                            tiles[r,c].AddNeighbor(tiles[r,c - 1], Direction.West);
                         }
                         if (r - 1 >= 0 && tiles[r - 1,c] != null)
                         {
-                            tiles[r,c].AddNeighbor(tiles[r - 1,c], "North");
+                            tiles[r,c].AddNeighbor(tiles[r - 1,c], Direction.North);
                         }
                         if (r + 1 < height && (c < width) && tiles[r + 1,c] != null)
                         {
-                            tiles[r,c].AddNeighbor(tiles[r + 1,c], "South");
+                            tiles[r,c].AddNeighbor(tiles[r + 1,c], Direction.South);
                         }
                         if ((r - 1 >= 0) && (c + 1 < width) && tiles[r - 1,c + 1] != null)
                         {
-                            tiles[r,c].AddNeighbor(tiles[r - 1,c + 1], "NorthEast");
+                            tiles[r,c].AddNeighbor(tiles[r - 1,c + 1], Direction.NorthEast);
                         }
                         if ((r + 1 < height) && (c + 1 < width) && tiles[r + 1,c + 1] != null)
                         {
-                            tiles[r,c].AddNeighbor(tiles[r + 1,c + 1], "SouthEast");
+                            tiles[r,c].AddNeighbor(tiles[r + 1,c + 1], Direction.SouthEast);
                         }
                         if ((r + 1 < height) && (c - 1 >= 0) && tiles[r + 1,c - 1] != null)
                         {
-                            tiles[r,c].AddNeighbor(tiles[r + 1,c - 1], "SouthWest");
+                            tiles[r,c].AddNeighbor(tiles[r + 1,c - 1], Direction.SouthWest);
                         }
                         if ((r - 1 >= 0) && (c - 1 >= 0) && tiles[r - 1,c - 1] != null)
                         {
-                            tiles[r,c].AddNeighbor(tiles[r - 1,c - 1], "NorthWest");
+                            tiles[r,c].AddNeighbor(tiles[r - 1,c - 1], Direction.NorthWest);
                         }
                     }
                 }
@@ -424,7 +424,14 @@ namespace Broken_Shadows
                 return !Tiles[y, x].AllowsMovement && Tiles[y, x].Neighbors.Exists(n => n.GetTile.AllowsMovement);
             }
             else
+                return false;
+        }
+
+        public bool IsWithinBounds(int x, int y)
+        {
+            if (x >= 0 && x < Width && y >= 0 && y < Height)
                 return true;
+            return false;
         }
 
         public void ChangeSelected(Tile selectedTile)

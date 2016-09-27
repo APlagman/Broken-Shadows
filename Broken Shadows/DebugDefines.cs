@@ -7,8 +7,13 @@
         public static bool ShowBuildString = true;
         public static bool ShowWindowsMouseCursor = false;
         public static bool ShowGridAndPlayerPositions = false;
-        public static bool DrawSegments = true;
-        public static bool DrawVertices = false;
-        public static bool DrawTriangles = true;
+
+        public static bool DrawStaticSegments = false; // Static Light Obstacles
+        public static bool DrawStaticVis = false; // Static Visibility Outline
+
+        public static bool DrawPlayerSegments = true; // Player Light Obstacles
+        public static bool DrawPlayerVertices = false; // Player Light Obstacle Corners
+        public static bool DrawPlayerVis = true; // Player Visibility Outline
+        public static bool DrawPlayerVisVertices = false; // Player Visibility Corners
     }
 }

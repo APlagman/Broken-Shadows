@@ -36,9 +36,9 @@ namespace Broken_Shadows.Objects
 
             Load();
             if (isSpawn)
-                Light = new Graphics.PointLight(Graphics.GraphicsManager.Get().LightEffect, Pose.Position, 75f, Color.Green, 0.5f);
+                Light = new Graphics.PointLight(Graphics.GraphicsManager.Get().LightEffect, Pose.Position, 150f, Color.Green, 0.5f);
             else if (isGoal)
-                Light = new Graphics.PointLight(Graphics.GraphicsManager.Get().LightEffect, Pose.Position, 75f, Color.Red, 0.5f);
+                Light = new Graphics.PointLight(Graphics.GraphicsManager.Get().LightEffect, Pose.Position, 100f, Color.Red, 0.5f);
         }
 
         public override void Update(float deltaTime)
@@ -67,9 +67,9 @@ namespace Broken_Shadows.Objects
             selectTexture = Game.Content.Load<Texture2D>(selectName);
         }
 
-        public void AddNeighbor(Tile t, string direction)
+        public void AddNeighbor(Tile t, Direction direction)
         {
-            Neighbors.Add(new NeighborTile(t, (Direction)Enum.Parse(typeof(Direction), direction)));
+            Neighbors.Add(new NeighborTile(t, direction));
         }
 
         public int ToData()

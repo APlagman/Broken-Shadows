@@ -66,12 +66,32 @@ namespace Broken_Shadows.Visibility
             AddSegment(corners[3], corners[0]);
         }
 
+        public void AddLevelOccludersAsSquare(Level level)
+        {
+            List<Segment> segments = new List<Segment>();
+            Vector2 offset = StateHandler.Get().GridPos;
+            for (int x = 0; x < level.Width; x++)
+            {
+                for (int y = 0; y < level.Height; y++)
+                {
+                    if (level.IsWall(x, y))
+                    {
+                        AddSquareOccluder(
+                            new Vector2(x * GlobalDefines.TileSize + offset.X, y * GlobalDefines.TileSize + offset.Y),
+                            GlobalDefines.TileSize,
+                            0
+                        );
+                    }
+                }
+            }
+        }
+
         public void AddLevelOccluders(Level level)
         {
             List<Segment> segments = new List<Segment>();
             Vector2 offset = StateHandler.Get().GridPos;
-            int w = level.Width * 2 + 1;
-            int h = level.Height * 2 + 1;
+            int w = level.Width * 2 + 2;
+            int h = level.Height * 2 + 2;
             bool[] seen = new bool[w * h];
             for (int x = 0; x < level.Width; x++)
             {

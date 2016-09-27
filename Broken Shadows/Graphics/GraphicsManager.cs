@@ -20,7 +20,7 @@ namespace Broken_Shadows.Graphics
         private Game game;
         private SpriteBatch spriteBatch;
         private Texture2D blank;
-        private Texture2D[] mouseTextures = new Texture2D[(int)MouseState.MAX_STATES];
+        private Texture2D[] mouseTextures = new Texture2D[(int)MouseState.NUM_STATES];
         private SpriteFont fpsFont;
 
         private List<GameObject> solids = new List<GameObject>();
@@ -164,7 +164,7 @@ namespace Broken_Shadows.Graphics
         private void DrawColorMap()
         {
             GraphicsDevice.SetRenderTarget(colorMap);
-            GraphicsDevice.Clear(Color.Black);
+            GraphicsDevice.Clear(GlobalDefines.BackgroundColor);
 
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.Default, RasterizerState.CullCounterClockwise, null);
           
@@ -187,7 +187,7 @@ namespace Broken_Shadows.Graphics
             GraphicsDevice.SetRenderTarget(lightMap);
             GraphicsDevice.Clear(Color.White * ((RenderLights) ? ambientLightStrength : 0));
 
-            // Draw normal object that emit light
+            // Draw normal objects that emit light
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.Default, RasterizerState.CullCounterClockwise);
 
             foreach (GameObject o in objects)
@@ -304,41 +304,66 @@ namespace Broken_Shadows.Graphics
         private void DrawSegments()
         {
             spriteBatch.Begin();
-            foreach (GameObject o in objects)
+            if (DebugDefines.DrawStaticSegments || DebugDefines.DrawStaticVis)
             {
-                if (o.GetType().Equals(typeof(Tile)))
+                foreach (GameObject o in objects)
                 {
-                    Tile t = (Tile)o;
-                    if (t.Light != null)
+                    if (o.GetType().Equals(typeof(Tile)))
                     {
-                        List<Visibility.Segment> segs = t.Light.Visibility.Segments;
-                        foreach (Visibility.Segment s in segs)
+                        Tile t = (Tile)o;
+                        if (t.Light != null)
                         {
-                            if (DebugDefines.DrawSegments)
-                                DrawLine(spriteBatch, 1f, Color.Yellow, s.P1.Position, s.P2.Position);
+                            if (DebugDefines.DrawStaticSegments)
+                            {
+                                List<Visibility.Segment> segs = t.Light.Visibility.Segments;
+                                foreach (Visibility.Segment s in segs)
+                                {
+                                    DrawLine(spriteBatch, 1f, Color.Yellow, s.P1.Position, s.P2.Position);
+                                }
+                            }
+                            if (DebugDefines.DrawStaticVis)
+                            {
+                                for (int v = 0; v < t.Light.Encounters.Count; v++)
+                                {
+                                    if (v < t.Light.Encounters.Count - 1)
+                                        DrawLine(spriteBatch, 1, Color.Orange, t.Light.Encounters[v], t.Light.Encounters[v + 1]);
+                                    else
+                                        DrawLine(spriteBatch, 1, Color.Orange, t.Light.Encounters[v], t.Light.Encounters[0]);
+                                }
+                            }
                         }
                     }
                 }
             }
-            foreach (Player p in playerObjects)
+            if (DebugDefines.DrawPlayerSegments || DebugDefines.DrawPlayerVertices || DebugDefines.DrawPlayerVis)
             {
-                List<Visibility.Segment> segs = p.Light.Visibility.Segments;
-                foreach (Visibility.Segment s in segs)
+                foreach (Player p in playerObjects)
                 {
-                    if (DebugDefines.DrawSegments)
-                        DrawLine(spriteBatch, 1f, Color.Red, s.P1.Position, s.P2.Position);
-                    if (DebugDefines.DrawVertices)
+                    List<Visibility.Segment> segs = p.Light.Visibility.Segments;
+                    foreach (Visibility.Segment s in segs)
                     {
-                        DrawCircle(spriteBatch, 10, Color.Red, new Vector2(s.P1.Position.X - 5f, s.P1.Position.Y - 5f));
-                        DrawCircle(spriteBatch, 10, Color.Red, new Vector2(s.P2.Position.X - 5f, s.P2.Position.Y - 5f));
+                        if (DebugDefines.DrawPlayerSegments)
+                            DrawLine(spriteBatch, 1f, Color.Red, s.P1.Position, s.P2.Position);
+                        if (DebugDefines.DrawPlayerVertices)
+                        {
+                            DrawCircle(spriteBatch, 10, Color.DarkRed, new Vector2(s.P1.Position.X - 5f, s.P1.Position.Y - 5f));
+                            DrawCircle(spriteBatch, 10, Color.DarkRed, new Vector2(s.P2.Position.X - 5f, s.P2.Position.Y - 5f));
+                        }
                     }
-                }
-                if (DebugDefines.DrawTriangles)
-                {
+
                     for (int v = 0; v < p.Light.Encounters.Count; v++)
                     {
-                        if (v < p.Light.Encounters.Count - 1)
-                            DrawLine(spriteBatch, 1, Color.Green, p.Light.Encounters[v], p.Light.Encounters[v + 1]);
+                        if (DebugDefines.DrawPlayerVis)
+                        {
+                            if (v < p.Light.Encounters.Count - 1)
+                                DrawLine(spriteBatch, 1, Color.Green, p.Light.Encounters[v], p.Light.Encounters[v + 1]);
+                            else
+                                DrawLine(spriteBatch, 1, Color.Green, p.Light.Encounters[v], p.Light.Encounters[0]);
+                        }
+                        if (DebugDefines.DrawPlayerVisVertices)
+                        {
+                            DrawCircle(spriteBatch, 10, Color.DarkGreen, new Vector2(p.Light.Encounters[v].X - 5f, p.Light.Encounters[v].Y - 5f));
+                        }
                     }
                 }
             }

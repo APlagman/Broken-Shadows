@@ -70,7 +70,6 @@
     <Compile Include="Level.cs" />
     <Compile Include="Localization.cs" />
     <Compile Include="Objects\GameObject.cs" />
-    <Compile Include="Objects\Entity.cs" />
     <Compile Include="Graphics\PointLight.cs" />
     <Compile Include="Objects\NeighborTile.cs" />
     <Compile Include="Objects\Player.cs" />

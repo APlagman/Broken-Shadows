@@ -1,4 +1,6 @@
-﻿namespace Broken_Shadows
+﻿using Microsoft.Xna.Framework;
+
+namespace Broken_Shadows
 {
     public class GlobalDefines
     {
@@ -10,6 +12,7 @@
         public static bool IsFullscreen = false;  // Default false.
         public static readonly int Fps = 60; // Default 60.
         public static readonly int MaxFpsSamples = 100; // Default 100.
+        public static readonly Color BackgroundColor = Color.Gray;
 
         // Grid Setup
         public static readonly int MovementFrames = 8; // Default 8.

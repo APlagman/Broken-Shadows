@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<locdata>
+  <!-- Note, don't put comments within text keys... they will get parsed! -->
+  <!-- Main Menu -->
+  <text id='ui_title'>Broken Shadows</text>
+  <text id='ui_new_game'>New Game</text>
+  <text id='ui_resume_game'>Resume Game</text>
+  <text id='ui_map_creator'>Map Creator</text>
+  <text id='ui_options'>Options</text>
+  <text id='ui_shutdown'>Exit</text>
+
+  <!-- Help Menu -->
+  <text id='ui_help_title'>How to Play</text>
+  <text id='ui_help_instructions'>
+    <font face='Instructions' color='#FFFFFF'>
+      Progress through each level, avoiding <font color='#ffa500'>hazards</font> and solving puzzles!<br/><br/>
+      Use <font color='#842DCE'>WASD</font> to move, <font color='#842DCE'>LSHIFT</font> to toggle centering the player, and <font color='#842DCE'>arrow keys</font> to pan the grid.<br/><br/>
+      <font color='#9999FF'>Light blue</font> tiles move when you do.<br/><br/>
+      If you get stuck, press <font color='#C11B17'>R</font>!<br/><br/>
+    </font>
+  </text>
+  <text id='ui_help_back'>Done</text>
+  
+  <!-- Pause Menu -->
+  <text id='ui_paused'>Paused</text>
+  <text id='ui_resume'>Resume</text>
+  <text id='ui_quit'>Quit</text>
+
+  <!-- Gameplay UI -->
+  
+  <!-- Map Creator UI-->
+  <text id='ui_chooseSize'>New Map Size:</text>
+  <text id='ui_plus'>+</text>
+  <text id='ui_minus'>-</text>
+  <text id='ui_create'>Create Map</text>
+  <text id='ui_blankMap'>New Map</text>
+  <text id='ui_reset'>Reset</text>
+  <text id='ui_resize'>Resize</text>
+  <text id='ui_change_tile'>Change Tile</text>
+  <text id='ui_choose_tile'>Enter a tile ID:</text>
+  <text id='ui_save'>Save</text>
+  <text id='ui_toggle_horiz'>Crop Horizontally:</text>
+  <text id='ui_toggle_vert'>Crop Vertically:</text>
+  <text id='ui_left'>Left</text>
+  <text id='ui_right'>Right</text>
+  <text id='ui_top'>Top</text>
+  <text id='ui_bottom'>Bottom</text>
+  <text id='ui_map_back'>Back</text>
+
+  <!-- Status Messages -->
+
+  <!-- Error Messages -->
+
+  <!-- Months -->
+  <text id='ui_month_1'>Jan. </text>
+  <text id='ui_month_2'>Feb. </text>
+  <text id='ui_month_3'>Mar. </text>
+  <text id='ui_month_4'>Apr. </text>
+  <text id='ui_month_5'>May  </text>
+  <text id='ui_month_6'>Jun. </text>
+  <text id='ui_month_7'>Jul. </text>
+  <text id='ui_month_8'>Aug. </text>
+  <text id='ui_month_9'>Sep. </text>
+  <text id='ui_month_10'>Oct. </text>
+  <text id='ui_month_11'>Nov. </text>
+  <text id='ui_month_12'>Dec. </text>
+</locdata>

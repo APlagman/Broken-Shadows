@@ -1,0 +1,7 @@
+C:\Programming\Broken Shadows\Library\bin\Debug\Library.dll
+C:\Programming\Broken Shadows\Library\bin\Debug\Library.pdb
+C:\Programming\Broken Shadows\Library\bin\Debug\System.Net.Http.dll
+C:\Programming\Broken Shadows\Library\bin\Debug\System.Net.Http.xml
+C:\Programming\Broken Shadows\Library\obj\Debug\Library.csprojResolveAssemblyReference.cache
+C:\Programming\Broken Shadows\Library\obj\Debug\Library.dll
+C:\Programming\Broken Shadows\Library\obj\Debug\Library.pdb

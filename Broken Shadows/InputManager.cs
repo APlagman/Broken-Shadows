@@ -31,8 +31,7 @@ namespace Broken_Shadows
         Up,
         Down,
         Left,
-        Right,
-        NUM_BINDINGS
+        Right
     }
 
     public class BindInfo
@@ -59,7 +58,7 @@ namespace Broken_Shadows
         ScrollRight,
         ScrollDown,
         ScrollLeft,
-        MAX_STATES
+        NUM_STATES
     }
 
     public class InputManager : Patterns.Singleton<InputManager>

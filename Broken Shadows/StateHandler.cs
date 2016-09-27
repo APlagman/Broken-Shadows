@@ -26,7 +26,7 @@ namespace Broken_Shadows
         private bool helpViewed;
 
         private LinkedList<GameObject> gameObjects = new LinkedList<GameObject>();
-        private List<Entity> creatures = new List<Entity>();
+        //private List<Entity> creatures = new List<Entity>();
         private List<Player> players = new List<Player>();
 
         // For Tile / Player overworld movement and selection.
@@ -374,7 +374,7 @@ namespace Broken_Shadows
         #endregion
 
         #region Object Creation
-        public void SpawnGameObject(Objects.GameObject o, bool isSolid = false)
+        public void SpawnGameObject(GameObject o, bool isSolid = false)
         {
             o.Load();
             gameObjects.AddLast(o);
@@ -382,7 +382,7 @@ namespace Broken_Shadows
             if (isSolid && !o.GetType().Equals(typeof(Objects.Tile))) Graphics.GraphicsManager.Get().AddSolid(o);
         }
 
-        public void RemoveGameObject(Objects.GameObject o, bool removeFromList = true)
+        public void RemoveGameObject(GameObject o, bool removeFromList = true)
         {
             o.Enabled = false;
             o.Unload();
@@ -392,7 +392,7 @@ namespace Broken_Shadows
             }
         }
 
-        public void RemovePlayer(Objects.Player p, bool removeFromList = true)
+        public void RemovePlayer(Player p, bool removeFromList = true)
         {
             p.Enabled = false;
             p.Unload();
@@ -405,12 +405,12 @@ namespace Broken_Shadows
         private void ClearGameObjects()
         {
             // Clear out any and all game objects
-            foreach (Objects.GameObject o in gameObjects)
+            foreach (GameObject o in gameObjects)
             {
                 RemoveGameObject(o, false);
             }
             gameObjects.Clear();
-            foreach (Objects.Player p in players)
+            foreach (Player p in players)
             {
                 RemovePlayer(p, false);
             }
