@@ -12,7 +12,7 @@ namespace Broken_Shadows.Graphics
 {
     public class PointLight
     {
-        public bool LightMoved { get; set; }
+        public bool Recalculate { get; set; }
         public VisibilityComputer Visibility { get; private set; }
         public List<Vector2> Encounters { get; private set; }
         private Effect lightEffect;
@@ -37,6 +37,7 @@ namespace Broken_Shadows.Graphics
             Color = color;
             Power = power;
 
+            Encounters = new List<Vector2>();
             Visibility = new VisibilityComputer(Position, Radius);
         }
 
@@ -44,10 +45,11 @@ namespace Broken_Shadows.Graphics
         {
             if (Power > 0)
             {
+                //System.Diagnostics.Debug.WriteLine("Rendering with " + obstacles.Count() + " obstacles.");
                 Visibility.Origin = Position;
                 Visibility.Radius = Radius;
 
-                if (LightMoved)
+                if (Recalculate || Encounters.Count == 0)
                 {
                     Visibility.ClearOccluders();
                     Visibility.AddLevelOccluders(level);
@@ -56,18 +58,16 @@ namespace Broken_Shadows.Graphics
                         float width = o.Pose.Scale.X * o.Texture.Width;
                         Visibility.AddSquareOccluder(o.Pose.Position, width, o.Pose.Rotation);
                     }
-                    //System.Diagnostics.Debug.WriteLine("Refreshed occluders");
-                    LightMoved = false;
+                    Encounters = new List<Vector2>();
+                    Encounters = Visibility.Compute();
+                    Recalculate = false;
                 }
-
-                List<Vector2> encounters = Visibility.Compute();
-                Encounters = encounters;
 
                 // Generate a triangle list from the encounter points
                 VertexPositionTexture[] vertices;
                 short[] indices;
 
-                TriangleListFromEncounters(encounters, out vertices, out indices);
+                TriangleListFromEncounters(Encounters, out vertices, out indices);
 
                 // Project the vertices to the screen
                 ProjectVertices(vertices, device.PresentationParameters.BackBufferWidth,
@@ -82,6 +82,7 @@ namespace Broken_Shadows.Graphics
                 // Draw the light on screen, using the triangle fan from the computed
                 // visibility mesh so that the light only influences the area that can be 
                 // "seen" from the light's position.
+                //System.Diagnostics.Debug.WriteLine("Encounters: " + Encounters.Count);
                 device.DrawUserIndexedPrimitives
                 (
                     PrimitiveType.TriangleList,
@@ -92,6 +93,15 @@ namespace Broken_Shadows.Graphics
                     0,
                     indices.Length / 3
                 );
+            }
+        }
+
+        public void ShiftEncounters(Vector2 toShift)
+        {
+            //System.Diagnostics.Debug.WriteLine("Shifted encounters for light at " + Position + " by " + toShift);
+            for (int e = 0; e < Encounters.Count; e++)
+            {
+                Encounters[e] += toShift;
             }
         }
 
@@ -115,6 +125,7 @@ namespace Broken_Shadows.Graphics
         private void TriangleListFromEncounters(List<Vector2> encounters,
             out VertexPositionTexture[] vertexArray, out short[] indexArray)
         {
+            //System.Diagnostics.Debug.WriteLine(encounters.Count);
             List<VertexPositionTexture> vertices = new List<VertexPositionTexture>();
 
             // Add a vertex for the center of the mesh

@@ -75,7 +75,8 @@ namespace Broken_Shadows
         /// Creates an array of tiles from level data and assigns neighbors.
         /// </summary>
         /// <param name="levelName">String representing the name of the level file to load.</param>
-        public virtual void LoadLevel(string levelName)
+        /// <returns>True upon successfully load, false otherwise.</returns>
+        public virtual bool LoadLevel(string levelName)
         {
             Tiles = null;
             LevelData lData;
@@ -87,7 +88,7 @@ namespace Broken_Shadows
             {
                 System.Diagnostics.Debug.WriteLine("*****Level loading failed, returning to main menu.");
                 StateHandler.Get().SetState(GameState.MainMenu);
-                return;
+                return false;
             }
             LevelColor = new Color(lData.RGBA[0], lData.RGBA[1], lData.RGBA[2], lData.RGBA[3]);
             int height = lData.Height;
@@ -98,6 +99,7 @@ namespace Broken_Shadows
 
             FillTiles(TileData, Tiles, height, width);
             AssignNeighbors(Tiles, height, width);
+            return true;
         }
 
         public virtual void LoadLevel()
@@ -253,7 +255,9 @@ namespace Broken_Shadows
             {
                 StateHandler.Get().SpawnGameObject(Tile, !isMap && !Tile.AllowsMovement);
                 if (Tile.Light != null)
+                {
                     Graphics.GraphicsManager.Get().AddLight(Tile.Light);
+                }
             }
 
             return Tile;
@@ -325,7 +329,7 @@ namespace Broken_Shadows
             do
             {         
                 Direction direction = vDir.ToDirection();
-                System.Diagnostics.Debug.WriteLine("Checking tiles to the " + direction);
+                //System.Diagnostics.Debug.WriteLine("Checking tiles to the " + direction);
                 List<Tile> movingTiles = FindMoving(direction);
                 if (movingTiles.Count > 0)
                 {
@@ -359,6 +363,7 @@ namespace Broken_Shadows
                     if (canMove && !t.IsMoving)
                     {
                         t.IsMoving = true;
+                        t.RecalculateLights = true;
                         moving.Add(t);
                         System.Diagnostics.Debug.WriteLine(t.OriginPosition + " is moving.");
                     }

@@ -90,6 +90,7 @@
     <Compile Include="Graphics\MarkupTextEngine.cs" />
     <Compile Include="Visibility\Endpoint.cs" />
     <Compile Include="Visibility\EndpointComparer.cs" />
+    <Compile Include="Visibility\SegmentIntersectionException.cs" />
     <Compile Include="Visibility\VectorMath.cs" />
     <Compile Include="Visibility\Segment.cs" />
     <Compile Include="Visibility\VisibilityComputer.cs" />

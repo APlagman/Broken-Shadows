@@ -8,7 +8,8 @@ namespace Broken_Shadows.Objects
     public class Player : GameObject
     {
         public Tile CurrentTile { get; set; }
-        public Graphics.PointLight Light { get; set; }
+        public Graphics.PointLight Light { get; private set; }
+        public bool RecalculateLights { get; set; }
 
         public Player(Game game)
             : base(game, "Entities/Player", new Pose2D(), null)
@@ -16,7 +17,7 @@ namespace Broken_Shadows.Objects
             base.Load();
 
             Load();
-            Light = new Graphics.PointLight(Graphics.GraphicsManager.Get().LightEffect, Pose.Position, 1000f, Color.White);
+            Light = new Graphics.PointLight(Graphics.GraphicsManager.Get().LightEffect, Pose.Position, 250f, Color.White);
         }
 
         public override void Update(float deltaTime)
@@ -24,10 +25,21 @@ namespace Broken_Shadows.Objects
             if (Light != null)
             {
                 Light.Position = Pose.Position;
-                Light.LightMoved = true;
+                if (RecalculateLights)
+                {
+                    Light.Recalculate = true;
+                    //System.Diagnostics.Debug.WriteLine("Refreshed occluders for player light at " + Light.Position);
+                }
             }
+            RecalculateLights = false;
 
             base.Update(deltaTime);
+        }
+
+        public void ShiftLights(Vector2 toShift)
+        {
+            if (Light != null && toShift != Vector2.Zero)
+                Light.ShiftEncounters(toShift);
         }
 
         /// <summary>

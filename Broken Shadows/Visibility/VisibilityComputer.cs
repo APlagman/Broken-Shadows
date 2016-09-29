@@ -213,21 +213,22 @@ namespace Broken_Shadows.Visibility
         /// </summary>        
         private void LoadBoundaries()
         {
-            //Top
-            AddSegment(new Vector2(Origin.X - Radius, Origin.Y - Radius),
-                            new Vector2(Origin.X + Radius, Origin.Y - Radius));
+            AddSquareOccluder(Origin, Radius * 2, 0);
+            ////Top
+            //AddSegment(new Vector2(Origin.X - Radius, Origin.Y - Radius),
+            //                new Vector2(Origin.X + Radius, Origin.Y - Radius));
 
-            //Bottom
-            AddSegment(new Vector2(Origin.X - Radius, Origin.Y + Radius),
-                            new Vector2(Origin.X + Radius, Origin.Y + Radius));
+            ////Bottom
+            //AddSegment(new Vector2(Origin.X - Radius, Origin.Y + Radius),
+            //                new Vector2(Origin.X + Radius, Origin.Y + Radius));
 
-            //Left
-            AddSegment(new Vector2(Origin.X - Radius, Origin.Y - Radius),
-                            new Vector2(Origin.X - Radius, Origin.Y + Radius));
+            ////Left
+            //AddSegment(new Vector2(Origin.X - Radius, Origin.Y - Radius),
+            //                new Vector2(Origin.X - Radius, Origin.Y + Radius));
 
-            //Right
-            AddSegment(new Vector2(Origin.X + Radius, Origin.Y - Radius),
-                            new Vector2(Origin.X + Radius, Origin.Y + Radius));
+            ////Right
+            //AddSegment(new Vector2(Origin.X + Radius, Origin.Y - Radius),
+            //                new Vector2(Origin.X + Radius, Origin.Y + Radius));
         }
 
         // Processes segments so that we can sort them later
@@ -291,8 +292,8 @@ namespace Broken_Shadows.Visibility
             // Expose it for the GUI to show a message. A more robust
             // implementation would split segments at intersections so
             // that part of the segment is in front and part is behind.
-
-            //demo_intersectionsDetected.push([a.p1, a.p2, b.p1, b.p2]);
+            if (a1 != a2 && b1 != b2)
+                throw new SegmentIntersectionException(a, b, VectorMath.LineLineIntersection(a.P1.Position, a.P2.Position, b.P1.Position, b.P2.Position));
             return false;
 
             // NOTE: previous implementation was a.d < b.d. That's simpler
@@ -301,75 +302,102 @@ namespace Broken_Shadows.Visibility
             // using distance will be a simpler and faster implementation.
         }
 
+        private void SplitSegments(Segment a, Segment b, Vector2 intersection)
+        {
+            AddSegment(a.P1.Position, intersection);
+            AddSegment(b.P1.Position, intersection);
+            a.P1.Position = intersection;
+            b.P1.Position = intersection;
+        }
+
         /// <summary>
         /// Computes the visibility polygon and returns the vertices
         /// of the triangle fan (minus the center vertex)
         /// </summary>        
         public List<Vector2> Compute()
         {
+            bool retry;
             List<Vector2> output = new List<Vector2>();
             LinkedList<Segment> open = new LinkedList<Segment>();
 
-            UpdateSegments();
-
-            endpoints.Sort(radialComparer);
-
-            float currentAngle = 0;
-
-            // At the beginning of the sweep we want to know which
-            // segments are active. The simplest way to do this is to make
-            // a pass collecting the segments, and make another pass to
-            // both collect and process them. However it would be more
-            // efficient to go through all the segments, figure out which
-            // ones intersect the initial sweep line, and then sort them.
-            for (int pass = 0; pass < 2; pass++)
+            do
             {
-                foreach (Endpoint p in endpoints)
+                retry = false;
+                try
                 {
-                    Segment currentOld = (open.Count == 0) ? null : open.First.Value;
+                    output.Clear();
+                    open.Clear();
+                    CheckIntersections();
+                    UpdateSegments();
 
-                    if (p.Begin)
+                    endpoints.Sort(radialComparer);
+
+                    float currentAngle = 0;
+
+                    // At the beginning of the sweep we want to know which
+                    // segments are active. The simplest way to do this is to make
+                    // a pass collecting the segments, and make another pass to
+                    // both collect and process them. However it would be more
+                    // efficient to go through all the segments, figure out which
+                    // ones intersect the initial sweep line, and then sort them.
+                    for (int pass = 0; pass < 2; pass++)
                     {
-                        // Insert into the right place in the list
-                        var node = open.First;
-                        while (node != null && SegmentInFrontOf(p.Segment, node.Value, Origin))
+                        foreach (Endpoint p in endpoints)
                         {
-                            node = node.Next;
+                            Segment currentOld = (open.Count == 0) ? null : open.First.Value;
+
+                            if (p.Begin)
+                            {
+                                // Insert into the right place in the list
+                                var node = open.First;
+                                while (node != null && SegmentInFrontOf(p.Segment, node.Value, Origin))
+                                {
+                                    node = node.Next;
+                                }
+
+                                if (node == null)
+                                {
+                                    open.AddLast(p.Segment);
+                                }
+                                else
+                                {
+                                    open.AddBefore(node, p.Segment);
+                                }
+                            }
+                            else
+                            {
+                                open.Remove(p.Segment);
+                            }
+
+
+                            Segment currentNew = null;
+                            if (open.Count != 0)
+                            {
+                                currentNew = open.First.Value;
+                            }
+
+                            if (currentOld != currentNew)
+                            {
+                                if (pass == 1)
+                                {
+                                    AddTriangle(output, currentAngle, p.Angle, currentOld);
+
+                                }
+                                currentAngle = p.Angle;
+                            }
                         }
-
-                        if (node == null)
-                        {
-                            open.AddLast(p.Segment);
-                        }
-                        else
-                        {
-                            open.AddBefore(node, p.Segment);
-                        }
-                    }
-                    else
-                    {
-                        open.Remove(p.Segment);
-                    }
-
-
-                    Segment currentNew = null;
-                    if (open.Count != 0)
-                    {
-                        currentNew = open.First.Value;
-                    }
-
-                    if (currentOld != currentNew)
-                    {
-                        if (pass == 1)
-                        {
-                            AddTriangle(output, currentAngle, p.Angle, currentOld);
-
-                        }
-                        currentAngle = p.Angle;
                     }
                 }
-            }
-
+                catch (SegmentIntersectionException e)
+                {
+                    System.Diagnostics.Debug.WriteLine("Segment from " + e.A.P1.Position + " to " + e.A.P2.Position + " and segment from " + e.B.P1.Position + " to " + e.B.P2.Position +
+                        " intersected at " + e.IntersectPoint);
+                    SplitSegments(e.A, e.B, e.IntersectPoint);
+                    retry = true;
+                };
+                
+            } while (retry);
+            
             return output;
         }
 
@@ -407,6 +435,26 @@ namespace Broken_Shadows.Visibility
 
             triangles.Add(pBegin);
             triangles.Add(pEnd);
+        }
+
+        private void CheckIntersections()
+        {
+            for (int i = 0; i < Segments.Count; i++)
+            {
+                Segment s1 = Segments[i];
+                for (int j = 0; j < Segments.Count; j++)
+                {
+                    Segment s2 = Segments[j];
+                    if (!s1.Equals(s2) && VectorMath.DoIntersect(s1.P1.Position, s1.P2.Position, s2.P1.Position, s2.P2.Position))
+                    {
+                        if (s1.P1.Position.Equals(s2.P1.Position) || s1.P1.Position.Equals(s2.P2.Position) || s1.P2.Position.Equals(s2.P1.Position) || s1.P2.Position.Equals(s2.P2.Position)) // Segments intersect at a corner.
+                            continue;
+                        Vector2 inter = VectorMath.LineLineIntersection(s1.P1.Position, s1.P2.Position, s2.P1.Position, s2.P2.Position);
+                        //System.Diagnostics.Debug.WriteLine("Splitting " + s1.P1.Position + "-" + s1.P2.Position + " and " + s2.P1.Position + "-" + s2.P2.Position + " at " + inter);
+                        SplitSegments(s1, s2, inter);
+                    }
+                }
+            }
         }
     }
 }

@@ -33,10 +33,11 @@ namespace Broken_Shadows
         private Level level;
         private int levelID;
         private Tile[] currentTiles, selectedTiles;
-        private Vector2 gridPos;
+        private Vector2 gridPos, prevGridPos;
         public Vector2 GridPos { get { return gridPos; } }
         private Vector2 inputDir, playerDir, prevDir, inputFramesLeft, playerFramesLeft;
         private bool gridIsMoving, centerPlayer;
+        private bool updatePlayerLights, updateStaticLights;
 
         public bool IsPaused { get { return paused; } set { paused = value; } }
 
@@ -61,7 +62,8 @@ namespace Broken_Shadows
             switch (nextState)
             {
                 case GameState.MainMenu:
-                    Graphics.GraphicsManager.Get().posString = "";
+                    Graphics.GraphicsManager.Get().gridPosString = "";
+                    Graphics.GraphicsManager.Get().BGColor = Color.Black;
                     UIStack.Clear();
                     UIStack.Push(new UI.UIMainMenu(game.Content));
                     ClearGameObjects();
@@ -69,6 +71,7 @@ namespace Broken_Shadows
                 case GameState.OverWorld:
                     SetupOverWorld();
                     if (!helpViewed) ShowHelpMenu();
+                    Graphics.GraphicsManager.Get().BGColor = GlobalDefines.BackgroundColor;
                     break;
                 case GameState.Creator:
                     SetupCreator();
@@ -88,6 +91,7 @@ namespace Broken_Shadows
             levelID = GlobalDefines.StartLevel;
             LoadLevel();
 
+            prevGridPos = Vector2.Zero;
             gridPos = new Vector2(GlobalDefines.WindowWidth / 2 - GlobalDefines.TileSize / 2, GlobalDefines.WindowHeight / 2 - GlobalDefines.TileSize) - players.First().OriginPosition;
             gridIsMoving = true;
             centerPlayer = true;
@@ -144,9 +148,21 @@ namespace Broken_Shadows
                 UpdateFrames();
                 UpdateTiles(deltaTime);
                 UpdatePlayers(deltaTime);
+                prevGridPos = gridPos;
 
                 if (DebugDefines.ShowGridAndPlayerPositions)
-                    Graphics.GraphicsManager.Get().posString = string.Format("Grid: {0}\nPlayer: {1}", gridPos, players.First().Pose.Position);
+                {
+                    if (playerDir == Vector2.Zero && prevDir != Vector2.Zero)
+                    {
+                        Graphics.GraphicsManager.Get().gridPosString = string.Format("Grid: {0}", gridPos);
+                        Graphics.GraphicsManager.Get().playerPosString = string.Format("Player1: {0}", players.First().Pose.Position);
+                    }
+                }
+
+                if (DebugDefines.ShowMousePos)
+                {
+                    Graphics.GraphicsManager.Get().mousePosString = "Mouse: " + InputManager.Get().MousePosition.ToString();
+                }
             }
         }
 
@@ -201,22 +217,26 @@ namespace Broken_Shadows
             {
                 playerFramesLeft.X--;
                 if (playerFramesLeft.X < 0 && inputFramesLeft.X < 0)
+                {
                     inputDir.X = 0;
+                }
             }
             if (playerFramesLeft.Y >= 0)
             {
                 playerFramesLeft.Y--;
                 if (playerFramesLeft.Y < 0 && inputFramesLeft.Y < 0)
+                {
                     inputDir.Y = 0;
+                }
             }
 
             playerDir = new Vector2((playerFramesLeft.X >= 0) ? inputDir.X : 0, (playerFramesLeft.Y >= 0) ? inputDir.Y : 0);
             if (playerDir != Vector2.Zero)
             {
-                prevDir = playerDir;
+                updatePlayerLights = true;
                 if (checkTiles && players.First().HasLegalNeighbor(playerDir))
                 {
-                    System.Diagnostics.Debug.WriteLine("Player Starting Position: " + players.First().OriginPosition);
+                    //System.Diagnostics.Debug.WriteLine("Player Starting Position: " + players.First().OriginPosition);
                     level.ShiftTiles(playerDir);
                 }
             }
@@ -245,6 +265,8 @@ namespace Broken_Shadows
                         t.Pose.Position = t.OriginPosition + gridPos;
                         if (t.IsMoving && centerPlayer) // Both OriginPosition and gridPos have moved, so the tile is one step off-center.
                             t.Pose.Position -= playerDir * GlobalDefines.TileStepSize;
+                        if (updateStaticLights && !t.RecalculateLights)
+                            t.ShiftLights(gridPos - prevGridPos);
                     }
                     o.Update(deltaTime);
                 }
@@ -267,24 +289,38 @@ namespace Broken_Shadows
                 }
                 if (playerDir != Vector2.Zero && player.HasLegalNeighbor(playerDir) || player.CurrentTile.IsMoving)
                 {
+                    //System.Diagnostics.Debug.WriteLine("Recalc lights - playerDir");
+                    player.RecalculateLights = true;
                     player.OriginPosition += playerDir * GlobalDefines.TileStepSize;
                     player.Pose.Position = player.OriginPosition + gridPos;
                     if (centerPlayer) // Both OriginPosition and gridPos have moved, so the player is one step off-center.
                         player.Pose.Position -= playerDir * GlobalDefines.TileStepSize;
                     if (playerFramesLeft.X <= 0 && playerFramesLeft.Y <= 0)
                     {
-                        System.Diagnostics.Debug.WriteLine("Player Ending Position: " + players.First().OriginPosition);
-                        System.Diagnostics.Debug.WriteLine("");
+                        //System.Diagnostics.Debug.WriteLine("Player Ending Position: " + players.First().OriginPosition);
                         player.CurrentTile = level.Intersects(player.Pose.Position.ToPoint());
+                        player.RecalculateLights = false;
                     }
+                }
+                else if (prevDir != Vector2.Zero && playerDir == Vector2.Zero)
+                {
+                    //System.Diagnostics.Debug.WriteLine("Recalc lights - prevDir");
+                    //System.Diagnostics.Debug.Write(Environment.NewLine);
+                    player.RecalculateLights = true;
                 }
                 if (player.CurrentTile.Equals(level.GoalTile))
                 {
                     LoadLevel(true);
                     return;
                 }
+                if (updatePlayerLights)
+                {
+                    //player.ShiftLights(playerDir * GlobalDefines.TileStepSize);
+                }
                 player.Update(deltaTime);
             }
+            updatePlayerLights = false;
+            prevDir = playerDir;
         }
         #endregion
 
@@ -297,20 +333,31 @@ namespace Broken_Shadows
             selectedTiles = null;
             currentTiles = null;
 
-            level.LoadLevel("Levels/Level" + ((loadNext) ? ++levelID : levelID));
-
-            Graphics.GraphicsManager.Get().Level = level;
-
-            players.Add(new Player(game));
-            foreach (Player player in players)
+            bool loaded = level.LoadLevel("Levels/Level" + ((loadNext) ? ++levelID : levelID));
+            if (loaded)
             {
-                player.CurrentTile = level.SpawnTile;
-                player.OriginPosition = player.Pose.Position = player.CurrentTile.OriginPosition;
-                player.Pose.Position = player.OriginPosition + gridPos;
-                Graphics.GraphicsManager.Get().AddPlayerObject(player);
-                Graphics.GraphicsManager.Get().AddLight(player.Light);
+                System.Diagnostics.Debug.WriteLine("*Level " + levelID + " loaded successfully.");
+
+                Graphics.GraphicsManager.Get().Level = level;
+
+                players.Add(new Player(game));
+                foreach (Player player in players)
+                {
+                    player.CurrentTile = level.SpawnTile;
+                    player.OriginPosition = player.Pose.Position = player.CurrentTile.OriginPosition;
+                    player.Pose.Position = player.OriginPosition + gridPos;
+                    Graphics.GraphicsManager.Get().AddPlayerObject(player);
+                    Graphics.GraphicsManager.Get().AddLight(player.Light);
+                    //System.Diagnostics.Debug.WriteLine("Recalc lights - load");
+                    player.RecalculateLights = true;
+                }
+                Graphics.GraphicsManager.Get().RenderLights = false;
+                foreach (GameObject o in gameObjects)
+                {
+                    if (o.Enabled && o.GetType().Name.Equals("Tile"))
+                        ((Tile)o).RecalculateLights = true;
+                }
             }
-            Graphics.GraphicsManager.Get().RenderLights = false;
         }
 
         #region Map Editor
@@ -379,7 +426,10 @@ namespace Broken_Shadows
             o.Load();
             gameObjects.AddLast(o);
             Graphics.GraphicsManager.Get().AddGameObject(o);
-            if (isSolid && !o.GetType().Equals(typeof(Objects.Tile))) Graphics.GraphicsManager.Get().AddSolid(o);
+            if (isSolid && !o.GetType().Equals(typeof(Objects.Tile)))
+            {
+                Graphics.GraphicsManager.Get().AddSolid(o);
+;            }
         }
 
         public void RemoveGameObject(GameObject o, bool removeFromList = true)
@@ -513,6 +563,20 @@ namespace Broken_Shadows
                     gridPos = new Vector2(GlobalDefines.TileSize / 2);
                     gridIsMoving = true;
                 }
+
+                if (prevGridPos != gridPos)
+                    updateStaticLights = true;
+
+                if (!centerPlayer && gridIsMoving)
+                {
+                    System.Diagnostics.Debug.WriteLine("Hi");
+                    updatePlayerLights = true;
+                }
+
+                if (DebugDefines.ShowGridAndPlayerPositions && gridIsMoving && playerDir == Vector2.Zero)
+                {
+                    //Graphics.GraphicsManager.Get().gridPosString = string.Format("Grid: {0}", gridPos);
+                }
             }
             #endregion
 
@@ -522,6 +586,8 @@ namespace Broken_Shadows
                 if (binds.ContainsKey(Binding.Toggle_Center_Player))
                 {
                     centerPlayer = !centerPlayer;
+                    updatePlayerLights = true;
+                    updateStaticLights = true;
                 }
                 if (binds.ContainsKey(Binding.Reset_Level))
                 {
