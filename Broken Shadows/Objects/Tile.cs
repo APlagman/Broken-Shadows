@@ -20,6 +20,7 @@ namespace Broken_Shadows.Objects
         public bool IsSelected { get; set; }
         public Graphics.PointLight Light { get; set; }
         public bool RecalculateLights { get; set; }
+        public Point GridCoordinates { get; set; }
         public List<NeighborTile> Neighbors { get; } = new List<NeighborTile>();
 
         public Tile(Game game, Pose2D pose, Level.TileType type, string textureName = "Tiles/Default", bool isSpawn = false, bool movementAllowed = false, bool isGoal = false, bool isRigid = true, bool canInteract = false, bool selected = false)

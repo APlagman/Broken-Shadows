@@ -150,7 +150,7 @@ namespace Broken_Shadows.Graphics
             if (Level != null) DrawLightMap((float)(Level.LevelColor.A / 255.0));
 
             // Blur the shadows
-            BlurRenderTarget(lightMap, 2.5f);
+            //BlurRenderTarget(lightMap, 2.5f);
 
             // Combine
             CombineAndDraw();
@@ -217,7 +217,7 @@ namespace Broken_Shadows.Graphics
             GraphicsDevice.DepthStencilState = DepthStencilState.None;
             GraphicsDevice.RasterizerState = RasterizerState.CullNone;
 
-            if (RenderLights)// && solids.Count > 0)
+            if (RenderLights)
             {
                 foreach (PointLight l in lights)
                 {
@@ -228,7 +228,7 @@ namespace Broken_Shadows.Graphics
 
         private void BlurRenderTarget(RenderTarget2D target, float strength)
         {
-            Vector2 renderTargetSize = new Vector2(target.Width, target.Height );
+            Vector2 renderTargetSize = new Vector2(target.Width, target.Height);
 
             blurEffect.Parameters["renderTargetSize"].SetValue(renderTargetSize);
             blurEffect.Parameters["blur"].SetValue(strength);

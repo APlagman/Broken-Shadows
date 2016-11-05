@@ -10,7 +10,7 @@ namespace Broken_Shadows
         public static readonly int MouseCursorSize = 32; // Default 32.
         public static bool VSync = true;  // Default true.
         public static bool IsFullscreen = false;  // Default false.
-        public static readonly bool FpsCap = false; // Default false.
+        public static readonly bool FpsCap = true; // Default false.
         public static readonly int MaxGameFps = 60; // Default 60.
         public static readonly int GraphicalFps = 60; // Default 60.
         public static readonly int MaxFpsSamples = 100; // Default 100.
@@ -27,6 +27,6 @@ namespace Broken_Shadows
         public static readonly string DefaultLocFile = "Content/Localization/en_us.xml";
 
         // Game Tweaks
-        public static readonly int StartLevel = 3; // Default 1.
+        public static readonly int StartLevel = 1; // Default 1.
     }
 }

@@ -113,6 +113,7 @@ namespace Broken_Shadows.Visibility
                                 if (!seen[faceIndex])
                                 {
                                     seen[faceIndex] = true;
+                                    //System.Diagnostics.Debug.WriteLine(string.Format("Seen {0} at ({1}, {2}). ", faceIndex, x, y));
                                     float x1 = centerX + frntDir[0] * 0.5f + perpDir[0] * 0.5f;
                                     float y1 = centerY + frntDir[1] * 0.5f + perpDir[1] * 0.5f;
                                     float x2 = centerX + frntDir[0] * 0.5f - perpDir[0] * 0.5f;
@@ -147,12 +148,16 @@ namespace Broken_Shadows.Visibility
                                         {
                                             x2 = joinX + 0.5f + frntDir[0] * 0.5f - perpDir[0] * signX * 0.5f;
                                             y2 = joinY + 0.5f + frntDir[1] * 0.5f - perpDir[1] * signY * 0.5f;
-                                            seen[(joinX + 1) * 2 + frntDir[0] + ((joinY + 1) * 2 + frntDir[1]) * w] = true;
+                                            int index = (joinX + 1) * 2 + frntDir[0] + ((joinY + 1) * 2 + frntDir[1]) * w;
+                                            seen[index] = true;
+                                            //System.Diagnostics.Debug.WriteLine(string.Format("Seen {0} at ({1}, {2}). ", index, x, y));
                                         }
                                         else {
                                             break;
                                         }
                                     }
+                                    //System.Diagnostics.Debug.WriteLine("( " + x + ", " + y + "): Face index - " + faceIndex + ", Offset - " + offset +", Segment from (" + (x1 * GlobalDefines.TileSize + offset.X - GlobalDefines.TileSize / 2) + ", " + (y1 * GlobalDefines.TileSize + offset.Y - GlobalDefines.TileSize / 2) + ") to (" +
+                                    //                                    (x2 * GlobalDefines.TileSize + offset.X - GlobalDefines.TileSize / 2) + ", " + (y2 * GlobalDefines.TileSize + offset.Y - GlobalDefines.TileSize / 2) + ").");
                                     AddSegment(new Vector2(x1 * GlobalDefines.TileSize + offset.X - GlobalDefines.TileSize / 2, 
                                                            y1 * GlobalDefines.TileSize + offset.Y - GlobalDefines.TileSize / 2), 
                                                new Vector2(x2 * GlobalDefines.TileSize + offset.X - GlobalDefines.TileSize / 2, 

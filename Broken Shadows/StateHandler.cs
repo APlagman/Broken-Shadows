@@ -560,6 +560,7 @@ namespace Broken_Shadows
                 }
                 if (binds.ContainsKey(Binding.Reset_Pan))
                 {
+                    System.Diagnostics.Debug.WriteLine("\nPan Reset\n");
                     gridPos = new Vector2(GlobalDefines.TileSize / 2);
                     gridIsMoving = true;
                 }
@@ -569,7 +570,6 @@ namespace Broken_Shadows
 
                 if (!centerPlayer && gridIsMoving)
                 {
-                    System.Diagnostics.Debug.WriteLine("Hi");
                     updatePlayerLights = true;
                 }
 
