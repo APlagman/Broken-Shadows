@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<XnaContent>
+	<Asset Type="Broken_Shadows.LevelData">
+	<Width>10</Width>
+	<Height>10</Height>
+	<Layout>
+		2 2 2 2 2 2 2 2 2 2 
+		2 2 2 2 2 2 2 2 2 2 
+		2 2 3 2 1 1 1 1 2 2 
+		2 2 1 2 2 -1 2 1 2 2 
+		2 2 1 2 -1 -1 2 1 2 2 
+		2 2 1 2 -1 2 2 1 2 2 
+		2 2 1 2 -1 -1 2 1 2 2 
+		2 2 1 1 1 1 2 4 2 2 
+		2 2 2 2 2 2 2 2 2 2 
+		2 2 2 2 2 2 2 2 2 2 
+	</Layout>
+	<RGBA>255 255 255 0</RGBA>
+	</Asset>
+</XnaContent>

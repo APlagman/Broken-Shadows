@@ -8,7 +8,8 @@ namespace Broken_Shadows.Objects
     public class Player : GameObject
     {
         public Tile CurrentTile { get; set; }
-        public Graphics.PointLight Light { get; set; }
+        public Graphics.PointLight Light { get; private set; }
+        public bool RecalculateLights { get; set; }
 
         public Player(Game game)
             : base(game, "Entities/Player", new Pose2D(), null)
@@ -16,25 +17,37 @@ namespace Broken_Shadows.Objects
             base.Load();
 
             Load();
-            Light = new Graphics.PointLight(Graphics.GraphicsManager.Get().LightEffect, Pose.Position, 1000f, Color.White);
+            Light = new Graphics.PointLight(Graphics.GraphicsManager.Get().LightEffect, Pose.Position, 250f, Color.White);
         }
 
         public override void Update(float deltaTime)
         {
             if (Light != null)
             {
+                //System.Diagnostics.Debug.WriteLine("Player: " + Pose.Position + ", Light: " + Light.Position);
                 Light.Position = Pose.Position;
-                Light.LightMoved = true;
+                if (RecalculateLights)
+                {
+                    Light.Recalculate = true;
+                    //System.Diagnostics.Debug.WriteLine("Refreshed occluders for player light at " + Light.Position);
+                }
             }
+            RecalculateLights = false;
 
             base.Update(deltaTime);
         }
 
+        public void ShiftLights(Vector2 toShift)
+        {
+            if (Light != null && toShift != Vector2.Zero)
+                Light.ShiftEncounters(toShift);
+        }
+
         /// <summary>
-        /// Returns true if the player's current tile has a neighbor in the corresponding direction that allows movement.
+        /// Returns whether the player's current tile has a neighbor in the corresponding direction that allows movement.
         /// </summary>
         /// <param name="dir">The vector direction to check.</param>
-        /// <returns></returns>
+        /// <returns>True if the player can move to its neighbor.</returns>
         public bool HasLegalNeighbor(Vector2 dir)
         {
             Direction checkDir = dir.ToDirection();

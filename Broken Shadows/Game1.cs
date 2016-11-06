@@ -12,7 +12,9 @@ namespace Broken_Shadows
         {
             Graphics.GraphicsManager.Get().Start(this);
             IsMouseVisible = false;
-            IsFixedTimeStep = true;
+            IsFixedTimeStep = GlobalDefines.FpsCap;
+            if (IsFixedTimeStep)
+                TargetElapsedTime = new TimeSpan(0, 0, 0, 0, 1000 / GlobalDefines.MaxGameFps);
             Content.RootDirectory = "Content";
 
             Window.Title = "Stay off my lawn!"; 
@@ -33,6 +35,7 @@ namespace Broken_Shadows
             InputManager.Get().Start();
             Localization.Get().Start(GlobalDefines.DefaultLocFile);
             base.Initialize();
+            System.Diagnostics.Debug.WriteLine("\nInitialization complete!\n");
         }
 
         protected override void LoadContent()

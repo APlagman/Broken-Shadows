@@ -19,6 +19,8 @@ namespace Broken_Shadows.Objects
         public bool IsMoving { get; set; } = false;
         public bool IsSelected { get; set; }
         public Graphics.PointLight Light { get; set; }
+        public bool RecalculateLights { get; set; }
+        public Point GridCoordinates { get; set; }
         public List<NeighborTile> Neighbors { get; } = new List<NeighborTile>();
 
         public Tile(Game game, Pose2D pose, Level.TileType type, string textureName = "Tiles/Default", bool isSpawn = false, bool movementAllowed = false, bool isGoal = false, bool isRigid = true, bool canInteract = false, bool selected = false)
@@ -46,10 +48,24 @@ namespace Broken_Shadows.Objects
             if (Light != null)
             {
                 Light.Position = Pose.Position;
-                Light.LightMoved = true;
+                if (RecalculateLights)
+                {
+                    Light.Recalculate = true;
+                    //System.Diagnostics.Debug.WriteLine("Refreshed occluders for tile light at " + Light.Position);
+                }
             }
+            RecalculateLights = false;
 
             base.Update(deltaTime);
+        }
+
+        public void ShiftLights(Vector2 toShift)
+        {
+            if (Light != null && toShift != Vector2.Zero)
+            {
+                Light.ShiftEncounters(toShift);
+                Light.ShiftSegments(toShift);
+            }
         }
 
         public override void Draw(SpriteBatch batch, float rotation, Vector2 origin, float scale, SpriteEffects effects, float depth)

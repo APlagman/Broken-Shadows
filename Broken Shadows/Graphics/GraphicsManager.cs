@@ -8,7 +8,9 @@ namespace Broken_Shadows.Graphics
 {
     public class GraphicsManager : Patterns.Singleton<GraphicsManager>
     {
-        public string posString = ""; // For Debug
+        public string gridPosString = ""; // For Debug
+        public string playerPosString = "";
+        public string mousePosString = "";
 
         public Effect LightEffect { get { return lightEffect; } }
         private Effect lightEffect, combineEffect, blurEffect;
@@ -22,6 +24,7 @@ namespace Broken_Shadows.Graphics
         private Texture2D blank;
         private Texture2D[] mouseTextures = new Texture2D[(int)MouseState.NUM_STATES];
         private SpriteFont fpsFont;
+        public Color BGColor;
 
         private List<GameObject> solids = new List<GameObject>();
         private List<GameObject> objects = new List<GameObject>();
@@ -43,7 +46,6 @@ namespace Broken_Shadows.Graphics
             graphics = new GraphicsDeviceManager(game);
             this.game = game;
             IsVSync = GlobalDefines.VSync;
-            this.game.TargetElapsedTime = new TimeSpan(0, 0, 0, 0, 1000 / GlobalDefines.Fps);
             
             if (!GlobalDefines.IsFullscreen)
             {
@@ -54,6 +56,7 @@ namespace Broken_Shadows.Graphics
                 SetResolutionToCurrent();
                 ToggleFullScreen();
             }
+            BGColor = Color.Black;
         }
 
         public void LoadContent()
@@ -147,7 +150,7 @@ namespace Broken_Shadows.Graphics
             if (Level != null) DrawLightMap((float)(Level.LevelColor.A / 255.0));
 
             // Blur the shadows
-            BlurRenderTarget(lightMap, 2.5f);
+            //BlurRenderTarget(lightMap, 2.5f);
 
             // Combine
             CombineAndDraw();
@@ -157,14 +160,14 @@ namespace Broken_Shadows.Graphics
 
             DrawOverlay(deltaTime);
             
-            if (!RenderLights) RenderLights = true;
+            RenderLights = true;
         }
 
         #region Draw Helpers
         private void DrawColorMap()
         {
             GraphicsDevice.SetRenderTarget(colorMap);
-            GraphicsDevice.Clear(GlobalDefines.BackgroundColor);
+            GraphicsDevice.Clear(BGColor);
 
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.Default, RasterizerState.CullCounterClockwise, null);
           
@@ -214,16 +217,18 @@ namespace Broken_Shadows.Graphics
             GraphicsDevice.DepthStencilState = DepthStencilState.None;
             GraphicsDevice.RasterizerState = RasterizerState.CullNone;
 
-
-            foreach (PointLight l in lights)
+            if (RenderLights)
             {
-                if (RenderLights) l.Render(GraphicsDevice, Level, solids);
+                foreach (PointLight l in lights)
+                {
+                    l.Render(GraphicsDevice, Level, solids);
+                }
             }
         }
 
         private void BlurRenderTarget(RenderTarget2D target, float strength)
         {
-            Vector2 renderTargetSize = new Vector2(target.Width, target.Height );
+            Vector2 renderTargetSize = new Vector2(target.Width, target.Height);
 
             blurEffect.Parameters["renderTargetSize"].SetValue(renderTargetSize);
             blurEffect.Parameters["blur"].SetValue(strength);
@@ -295,7 +300,14 @@ namespace Broken_Shadows.Graphics
             // Draw Positions
             if (DebugDefines.ShowGridAndPlayerPositions)
             {
-                spriteBatch.DrawString(fpsFont, posString, fpsPosition, Color.MonoGameOrange);
+                spriteBatch.DrawString(fpsFont, gridPosString, fpsPosition, Color.MonoGameOrange);
+                fpsPosition.Y += 25.0f;
+                spriteBatch.DrawString(fpsFont, playerPosString, fpsPosition, Color.MonoGameOrange);
+                fpsPosition.Y += 25.0f;
+            }
+            if (DebugDefines.ShowMousePos)
+            {
+                spriteBatch.DrawString(fpsFont, mousePosString, fpsPosition, Color.MonoGameOrange);
                 fpsPosition.Y += 25.0f;
             }
             spriteBatch.End();
@@ -351,18 +363,21 @@ namespace Broken_Shadows.Graphics
                         }
                     }
 
-                    for (int v = 0; v < p.Light.Encounters.Count; v++)
+                    if (p.Light != null && p.Light.Encounters != null)
                     {
-                        if (DebugDefines.DrawPlayerVis)
+                        for (int v = 0; v < p.Light.Encounters.Count; v++)
                         {
-                            if (v < p.Light.Encounters.Count - 1)
-                                DrawLine(spriteBatch, 1, Color.Green, p.Light.Encounters[v], p.Light.Encounters[v + 1]);
-                            else
-                                DrawLine(spriteBatch, 1, Color.Green, p.Light.Encounters[v], p.Light.Encounters[0]);
-                        }
-                        if (DebugDefines.DrawPlayerVisVertices)
-                        {
-                            DrawCircle(spriteBatch, 10, Color.DarkGreen, new Vector2(p.Light.Encounters[v].X - 5f, p.Light.Encounters[v].Y - 5f));
+                            if (DebugDefines.DrawPlayerVis)
+                            {
+                                if (v < p.Light.Encounters.Count - 1)
+                                    DrawLine(spriteBatch, 1, Color.Green, p.Light.Encounters[v], p.Light.Encounters[v + 1]);
+                                else
+                                    DrawLine(spriteBatch, 1, Color.Green, p.Light.Encounters[v], p.Light.Encounters[0]);
+                            }
+                            if (DebugDefines.DrawPlayerVisVertices)
+                            {
+                                DrawCircle(spriteBatch, 10, Color.DarkGreen, new Vector2(p.Light.Encounters[v].X - 5f, p.Light.Encounters[v].Y - 5f));
+                            }
                         }
                     }
                 }

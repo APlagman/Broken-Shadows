@@ -263,3 +263,8 @@
 /processorParam:DebugMode=Auto
 /build:Shaders/Light.fx
 
+#begin Levels/Level4.xml
+/importer:XmlImporter
+/processor:PassThroughProcessor
+/build:Levels/Level4.xml
+

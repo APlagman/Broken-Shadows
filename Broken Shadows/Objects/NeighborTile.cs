@@ -7,15 +7,15 @@ namespace Broken_Shadows.Objects
 {
     public enum Direction
     {
-        None = 0,
         North,
-        South,
-        West,
-        East,
-        NorthWest,
         NorthEast,
+        East,
+        SouthEast,
+        South,
         SouthWest,
-        SouthEast
+        West,
+        NorthWest,
+        None
     }
 
     public class NeighborTile
