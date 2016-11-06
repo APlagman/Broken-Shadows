@@ -52,23 +52,39 @@ namespace Broken_Shadows
         {
             if (direction == Direction.None) return Vector2.Zero;
 
-            int x, y, dir = (int)direction;
+            int x = 0, y = 0, dir = (int)direction;
 
-            // X
-            if (dir.IsBetween(1, 3))
-                x = 1;
-            else if (dir.IsBetween(5, 7))
-                x = -1;
-            else
-                x = 0;
-
-            // Y
-            if (dir.IsBetween(0, 1) || dir == 7)
-                y = -1;
-            else if (dir.IsBetween(3, 5))
-                y = 1;
-            else
-                y = 0;
+            switch (dir)
+            {
+                case ((int)Direction.North):
+                    y = -1;
+                    break;
+                case ((int)Direction.NorthEast):
+                    x = 1;
+                    y = -1;
+                    break;
+                case ((int)Direction.East):
+                    x = 1;
+                    break;
+                case ((int)Direction.SouthEast):
+                    x = 1;
+                    y = 1;
+                    break;
+                case ((int)Direction.South):
+                    y = 1;
+                    break;
+                case ((int)Direction.SouthWest):
+                    x = -1;
+                    y = 1;
+                    break;
+                case ((int)Direction.West):
+                    x = -1;
+                    break;
+                case ((int)Direction.NorthWest):
+                    x = -1;
+                    y = -1;
+                    break;
+            }
 
             return new Vector2(x, y);
         }

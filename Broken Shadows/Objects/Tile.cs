@@ -62,7 +62,10 @@ namespace Broken_Shadows.Objects
         public void ShiftLights(Vector2 toShift)
         {
             if (Light != null && toShift != Vector2.Zero)
+            {
                 Light.ShiftEncounters(toShift);
+                Light.ShiftSegments(toShift);
+            }
         }
 
         public override void Draw(SpriteBatch batch, float rotation, Vector2 origin, float scale, SpriteEffects effects, float depth)

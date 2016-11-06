@@ -74,7 +74,7 @@ namespace Broken_Shadows.Visibility
             {
                 for (int y = 0; y < level.Height; y++)
                 {
-                    if (level.IsWall(x, y))
+                    if (level.IsTileWall(x, y))
                     {
                         AddSquareOccluder(
                             new Vector2(x * GlobalDefines.TileSize + offset.X, y * GlobalDefines.TileSize + offset.Y),
@@ -86,7 +86,11 @@ namespace Broken_Shadows.Visibility
             }
         }
 
-        public void AddLevelOccluders(Level level)
+        /// <summary>
+        /// Based on the given level, creates and joins neighboring light-occluding objects to simplify the intensity of visibility calculation.
+        /// </summary>
+        /// <param name="level">The level containing occluding objects.</param>
+        public void AddJoinedLevelOccluders(Level level)
         {
             List<Segment> segments = new List<Segment>();
             Vector2 offset = StateHandler.Get().GridPos;
@@ -97,7 +101,7 @@ namespace Broken_Shadows.Visibility
             {
                 for (int y = 0; y < level.Height; y++)
                 {
-                    if (level.IsWall(x, y))
+                    if (level.IsTileWall(x, y))
                     {
                         float centerX = x + 0.5f;
                         float centerY = y + 0.5f;
@@ -107,13 +111,12 @@ namespace Broken_Shadows.Visibility
                             int[] perpDir = dirs[(i + 1) % dirs.GetLength(0)];
                             int neighborX = x + frntDir[0];
                             int neighborY = y + frntDir[1];
-                            if (!level.IsWall(neighborX, neighborY))
+                            if (!level.IsTileWall(neighborX, neighborY))
                             {
                                 int faceIndex = (x + 1) * 2 + frntDir[0] + ((y + 1) * 2 + frntDir[1]) * w;
                                 if (!seen[faceIndex])
                                 {
                                     seen[faceIndex] = true;
-                                    //System.Diagnostics.Debug.WriteLine(string.Format("Seen {0} at ({1}, {2}). ", faceIndex, x, y));
                                     float x1 = centerX + frntDir[0] * 0.5f + perpDir[0] * 0.5f;
                                     float y1 = centerY + frntDir[1] * 0.5f + perpDir[1] * 0.5f;
                                     float x2 = centerX + frntDir[0] * 0.5f - perpDir[0] * 0.5f;
@@ -144,20 +147,17 @@ namespace Broken_Shadows.Visibility
                                         joinY += stepY;
                                         neighborX = joinX + frntDir[0];
                                         neighborY = joinY + frntDir[1];
-                                        if (level.IsWall(joinX, joinY) && !level.IsWall(neighborX, neighborY))
+                                        if (level.IsTileWall(joinX, joinY) && !level.IsTileWall(neighborX, neighborY))
                                         {
                                             x2 = joinX + 0.5f + frntDir[0] * 0.5f - perpDir[0] * signX * 0.5f;
                                             y2 = joinY + 0.5f + frntDir[1] * 0.5f - perpDir[1] * signY * 0.5f;
                                             int index = (joinX + 1) * 2 + frntDir[0] + ((joinY + 1) * 2 + frntDir[1]) * w;
                                             seen[index] = true;
-                                            //System.Diagnostics.Debug.WriteLine(string.Format("Seen {0} at ({1}, {2}). ", index, x, y));
                                         }
                                         else {
                                             break;
                                         }
                                     }
-                                    //System.Diagnostics.Debug.WriteLine("( " + x + ", " + y + "): Face index - " + faceIndex + ", Offset - " + offset +", Segment from (" + (x1 * GlobalDefines.TileSize + offset.X - GlobalDefines.TileSize / 2) + ", " + (y1 * GlobalDefines.TileSize + offset.Y - GlobalDefines.TileSize / 2) + ") to (" +
-                                    //                                    (x2 * GlobalDefines.TileSize + offset.X - GlobalDefines.TileSize / 2) + ", " + (y2 * GlobalDefines.TileSize + offset.Y - GlobalDefines.TileSize / 2) + ").");
                                     AddSegment(new Vector2(x1 * GlobalDefines.TileSize + offset.X - GlobalDefines.TileSize / 2, 
                                                            y1 * GlobalDefines.TileSize + offset.Y - GlobalDefines.TileSize / 2), 
                                                new Vector2(x2 * GlobalDefines.TileSize + offset.X - GlobalDefines.TileSize / 2, 
@@ -219,21 +219,6 @@ namespace Broken_Shadows.Visibility
         private void LoadBoundaries()
         {
             AddSquareOccluder(Origin, Radius * 2, 0);
-            ////Top
-            //AddSegment(new Vector2(Origin.X - Radius, Origin.Y - Radius),
-            //                new Vector2(Origin.X + Radius, Origin.Y - Radius));
-
-            ////Bottom
-            //AddSegment(new Vector2(Origin.X - Radius, Origin.Y + Radius),
-            //                new Vector2(Origin.X + Radius, Origin.Y + Radius));
-
-            ////Left
-            //AddSegment(new Vector2(Origin.X - Radius, Origin.Y - Radius),
-            //                new Vector2(Origin.X - Radius, Origin.Y + Radius));
-
-            ////Right
-            //AddSegment(new Vector2(Origin.X + Radius, Origin.Y - Radius),
-            //                new Vector2(Origin.X + Radius, Origin.Y + Radius));
         }
 
         // Processes segments so that we can sort them later

@@ -145,10 +145,15 @@ namespace Broken_Shadows
                     gridPos = new Vector2(Graphics.GraphicsManager.Get().Width / 2 - GlobalDefines.TileSize / 2, Graphics.GraphicsManager.Get().Height / 2 - GlobalDefines.TileSize) - players.First().OriginPosition;
                     gridIsMoving = true;
                 }
+
+                if (prevGridPos != gridPos)
+                    updateStaticLights = true;
+
                 UpdateFrames();
                 UpdateTiles(deltaTime);
                 UpdatePlayers(deltaTime);
                 prevGridPos = gridPos;
+                updateStaticLights = false;
 
                 if (DebugDefines.ShowGridAndPlayerPositions)
                 {
@@ -266,7 +271,10 @@ namespace Broken_Shadows
                         if (t.IsMoving && centerPlayer) // Both OriginPosition and gridPos have moved, so the tile is one step off-center.
                             t.Pose.Position -= playerDir * GlobalDefines.TileStepSize;
                         if (updateStaticLights && !t.RecalculateLights)
+                        {
+                            //System.Diagnostics.Debug.WriteLine("Shifting: " + gridPos + " " + prevGridPos);
                             t.ShiftLights(gridPos - prevGridPos);
+                        }
                     }
                     o.Update(deltaTime);
                 }
@@ -299,7 +307,6 @@ namespace Broken_Shadows
                     {
                         //System.Diagnostics.Debug.WriteLine("Player Ending Position: " + players.First().OriginPosition);
                         player.CurrentTile = level.Intersects(player.Pose.Position.ToPoint());
-                        player.RecalculateLights = false;
                     }
                 }
                 else if (prevDir != Vector2.Zero && playerDir == Vector2.Zero)
@@ -313,9 +320,9 @@ namespace Broken_Shadows
                     LoadLevel(true);
                     return;
                 }
-                if (updatePlayerLights)
+                if (updatePlayerLights && !player.RecalculateLights && player.HasLegalNeighbor(playerDir))
                 {
-                    //player.ShiftLights(playerDir * GlobalDefines.TileStepSize);
+                    player.ShiftLights(playerDir * GlobalDefines.TileStepSize);
                 }
                 player.Update(deltaTime);
             }
@@ -563,14 +570,13 @@ namespace Broken_Shadows
                     System.Diagnostics.Debug.WriteLine("\nPan Reset\n");
                     gridPos = new Vector2(GlobalDefines.TileSize / 2);
                     gridIsMoving = true;
+                    updatePlayerLights = true;
                 }
 
                 if (prevGridPos != gridPos)
-                    updateStaticLights = true;
-
-                if (!centerPlayer && gridIsMoving)
                 {
                     updatePlayerLights = true;
+                    updateStaticLights = true;
                 }
 
                 if (DebugDefines.ShowGridAndPlayerPositions && gridIsMoving && playerDir == Vector2.Zero)

@@ -52,7 +52,7 @@ namespace Broken_Shadows.Graphics
                 if (Recalculate || Encounters.Count == 0)
                 {
                     Visibility.ClearOccluders();
-                    Visibility.AddLevelOccluders(level);
+                    Visibility.AddJoinedLevelOccluders(level);
                     foreach (Objects.GameObject o in obstacles)
                     {
                         float width = o.Pose.Scale.X * o.Texture.Width;
@@ -98,10 +98,18 @@ namespace Broken_Shadows.Graphics
 
         public void ShiftEncounters(Vector2 toShift)
         {
-            //System.Diagnostics.Debug.WriteLine("Shifted encounters for light at " + Position + " by " + toShift);
             for (int e = 0; e < Encounters.Count; e++)
             {
                 Encounters[e] += toShift;
+            }
+        }
+
+        public void ShiftSegments(Vector2 toShift)
+        {
+            for (int s = 0; s < Visibility.Segments.Count; s++)
+            {
+                Visibility.Segments[s].P1.Position += toShift;
+                Visibility.Segments[s].P2.Position += toShift;
             }
         }
 

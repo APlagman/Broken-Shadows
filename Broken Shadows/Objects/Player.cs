@@ -24,6 +24,7 @@ namespace Broken_Shadows.Objects
         {
             if (Light != null)
             {
+                //System.Diagnostics.Debug.WriteLine("Player: " + Pose.Position + ", Light: " + Light.Position);
                 Light.Position = Pose.Position;
                 if (RecalculateLights)
                 {
@@ -43,10 +44,10 @@ namespace Broken_Shadows.Objects
         }
 
         /// <summary>
-        /// Returns true if the player's current tile has a neighbor in the corresponding direction that allows movement.
+        /// Returns whether the player's current tile has a neighbor in the corresponding direction that allows movement.
         /// </summary>
         /// <param name="dir">The vector direction to check.</param>
-        /// <returns></returns>
+        /// <returns>True if the player can move to its neighbor.</returns>
         public bool HasLegalNeighbor(Vector2 dir)
         {
             Direction checkDir = dir.ToDirection();

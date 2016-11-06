@@ -22,7 +22,7 @@ namespace Broken_Shadows
 
         private Game game;
         private Tile[,] tileGrid;
-        private List<Tile> moveableTiles;
+        private HashSet<Tile> moveableTiles;
         public int Width { get { return tileGrid.GetLength(1); } }
         public int Height { get { return tileGrid.GetLength(0); } }
         public Tile SpawnTile { get; private set; }
@@ -187,6 +187,7 @@ namespace Broken_Shadows
         /// <param name="height">The number of rows in the Tile array.</param>
         private void FillTiles(int[,] TileData, Tile[,] Tiles, int height, int width)
         {
+            moveableTiles = new HashSet<Tile>();
             int rowCount = 0;
             while (rowCount < height)
             {
@@ -199,6 +200,8 @@ namespace Broken_Shadows
                         float tileHeight = GlobalDefines.TileSize;
                         Tile t = CreateTile(new Vector2(colCount * tileHeight, rowCount * tileHeight), type);
 
+                        if (!t.IsRigid)
+                            moveableTiles.Add(t);
                         if (t.IsSpawn)
                             SpawnTile = t;
                         if (t.IsGoal)
@@ -278,15 +281,15 @@ namespace Broken_Shadows
                 int dx = (int)dirVector.X;
                 int dy = (int)dirVector.Y;
 
-                for (int r = 0; r < height; r++) // Row
+                for (int row = 0; row < height; row++) // Row
                 {
-                    for (int c = 0; c < width; c++) // Column
+                    for (int col = 0; col < width; col++) // Column
                     {
-                        int newRow = r + dy;
-                        int newCol = c + dx;
-                        if (tiles[r, c] != null && !tiles[r, c].IsRigid && IsWithinLevelBounds(newCol, newRow) && tiles[newRow, newCol] != null)
+                        int newRow = row + dy;
+                        int newCol = col + dx;
+                        if (tiles[row, col] != null && IsWithinLevelBounds(newCol, newRow) && tiles[newRow, newCol] != null)
                         {
-                            tiles[r, c].AddNeighbor(tiles[newRow, newCol], (Direction)dir);
+                            tiles[row, col].AddNeighbor(tiles[newRow, newCol], (Direction)dir);
                         }
                     }
                 }
@@ -312,12 +315,15 @@ namespace Broken_Shadows
             do
             {         
                 Direction direction = vDir.ToDirection();
-                List<Tile> movingTiles = FindMovingTiles(direction); // Which tiles can move?
+                HashSet<Tile> movingTiles = FindMovingTiles(direction); // Which tiles can move?
                 if (movingTiles.Count > 0) // If any can move, update them.
                 {
                     shifted = true;
+                    HashSet<Tile> oldNeighborTiles = GetUniqueNeighbors(movingTiles); // Get old neighbors before moving tiles around.
                     SwapTiles(movingTiles, vDir);
-                    ReassignNeighborTiles(movingTiles); // Neighbors are relative to the tile's current position and must be updated accordingly.
+                    // Neighbors are relative to the tile's current position and must be updated accordingly.
+                    // However, each moving tile's old neighbors (before the move) and new neighbors (after the move) must also be updated.
+                    ReassignNeighborTilesWithContext(movingTiles, oldNeighborTiles);
                 }
                 else
                     keepChecking = false;
@@ -331,12 +337,12 @@ namespace Broken_Shadows
         /// </summary>
         /// <param name="direction">The cardinal direction (up/down/left/right/diagonal) to check if a tile can move in.</param>
         /// <returns>A list of Tiles which can legally move.</returns>
-        private List<Tile> FindMovingTiles(Direction direction)
+        private HashSet<Tile> FindMovingTiles(Direction direction)
         {
-            List<Tile> moving = new List<Tile>();
+            HashSet<Tile> moving = new HashSet<Tile>();
             foreach (Tile t in moveableTiles) // The current level stores a list of moveable tiles to prevent iterating through the entire grid.
             {
-                bool canMove = t.Neighbors.Exists(n => (n.Direction == direction)); // Tiles can only move into non-occupied space.
+                bool canMove = !t.Neighbors.Exists(n => (n.Direction == direction)); // Tiles can only move into non-occupied space.
                 if (canMove && !t.IsMoving)
                 {
                     t.IsMoving = true; // IsMoving is used by the game update logic to visually "slide" tiles from one spot to another.
@@ -353,7 +359,7 @@ namespace Broken_Shadows
         /// </summary>
         /// <param name="movingTiles">The list of Tiles to swap.</param>
         /// <param name="vDir">The direction in which to swap each tile.</param>
-        private void SwapTiles(List<Tile> movingTiles, Vector2 vDir)
+        private void SwapTiles(HashSet<Tile> movingTiles, Vector2 vDir)
         {
             int dx = (int)vDir.X;
             int dy = (int)vDir.Y;
@@ -367,28 +373,44 @@ namespace Broken_Shadows
 
                 Tile temp = tileGrid[row, col];
                 tileGrid[row, col] = tileGrid[newRow, newCol];
-                tileGrid[row, col].GridCoordinates = new Point(col, row); // Update each tile's knowledge of its position in the grid to assist further shifting.
                 tileGrid[newRow, newCol] = temp;
-                tileGrid[newRow, newCol].GridCoordinates = new Point(newCol, newRow);
+                // Update each tile's knowledge of its position in the grid to assist further shifting.
+                if (tileGrid[row, col] != null) tileGrid[row, col].GridCoordinates = new Point(col, row);
+                if (tileGrid[newRow, newCol] != null) tileGrid[newRow, newCol].GridCoordinates = new Point(newCol, newRow);
             }
         }
 
         /// <summary>
-        /// Reassigns neighbors to the specified tiles in each of the 8 cardinal directions (includes diagonals).
+        /// Reassigns links to neighbors to the specified tiles, their old neighbors, and their new neighbors.
         /// </summary>
-        /// <param name="needReassigned">List of tiles that need their neighbors reassigned. Should only ever be moving tiles.</param>
-        private void ReassignNeighborTiles(List<Tile> needReassigned)
+        /// <param name="needReassigned">List of tiles that need their neighbors reassigned.</param>
+        /// <param name="oldNeighbors">List of previous neighbors of needReassigned.</param>
+        private void ReassignNeighborTilesWithContext(HashSet<Tile> needReassigned, HashSet<Tile> oldNeighbors)
         {
-            for (int dir = 0; dir < 8; dir++)
+            ReassignNeighborTiles(needReassigned); // Update moved tiles' neighbors.
+            HashSet<Tile> combinedNeighbors = GetUniqueNeighbors(needReassigned);
+            combinedNeighbors.UnionWith(oldNeighbors);
+            ReassignNeighborTiles(combinedNeighbors); // Update the combined set of old and new neighbors from those that have been moved.
+        }
+
+        /// <summary>
+        /// Reassigns all neighbor links to the specified set of tiles.
+        /// </summary>
+        /// <param name="toReassign">The set of tiles which need their neighbors reassigned.</param>
+        private void ReassignNeighborTiles(HashSet<Tile> toReassign)
+        {
+            foreach(Tile t in toReassign)
+                t.Neighbors.Clear(); // Clear old neighbors to avoid duplicates.
+
+            for (int dir = 0; dir < 8; dir++) // Check all 8 directions for each tile, refreshing its neighbors.
             {
                 var dirVector = ((Direction)dir).ToVector2();
 
-                foreach (Tile t in needReassigned)
+                foreach (Tile t in toReassign)
                 {
-                    t.Neighbors.Clear();
                     int newRow = t.GridCoordinates.Y + (int)dirVector.Y; // Row + dy
                     int newCol = t.GridCoordinates.X + (int)dirVector.X; // Column + dx
-                    
+
                     if (IsWithinLevelBounds(newCol, newRow) && tileGrid[newRow, newCol] != null) // Make sure only valid neighbors are added.
                     {
                         t.AddNeighbor(tileGrid[newRow, newCol], (Direction)dir);
@@ -398,9 +420,35 @@ namespace Broken_Shadows
         }
         #endregion
 
-        public bool IsWall(int x, int y)
+        /// <summary>
+        /// Given a set of unique tiles, returns unique neighboring tiles of that set.
+        /// </summary>
+        /// <param name="toCheck">The set of tiles to retrieve neighbors from.</param>
+        /// <returns>A HashSet of Tiles which neighbor those given.</returns>
+        private HashSet<Tile> GetUniqueNeighbors(HashSet<Tile> toCheck)
         {
-            if (x >= 0 && x < Width && y >= 0 && y < Height)
+            if (toCheck == null) return null;
+
+            HashSet<Tile> uniqueNeighbors = new HashSet<Tile>();
+            foreach (Tile t in toCheck)
+            {
+                t.Neighbors.ForEach(n => {
+                    uniqueNeighbors.Add(n.GetTile); // The HashSet will automatically ignore duplicates.
+                });
+            }
+
+            return uniqueNeighbors;
+        }
+
+        /// <summary>
+        /// Returns whether the tile at the given coordinates is a wall.
+        /// </summary>
+        /// <param name="x">The x position of the tile (i.e. column in the grid).</param>
+        /// <param name="y">The y position of the tile (i.e. row in the grid).</param>
+        /// <returns>True if the given coordinates are within valid bounds and the tile blocks movement.</returns>
+        public bool IsTileWall(int x, int y)
+        {
+            if (IsWithinLevelBounds(x, y))
             {
                 if (tileGrid[y, x] == null)
                     return false;
@@ -410,6 +458,28 @@ namespace Broken_Shadows
                 return false;
         }
 
+        /// <summary>
+        /// Returns whether the point in the grid at the given coordinates is empty.
+        /// </summary>
+        /// <param name="x">The x position of the tile (i.e. column in the grid).<param>
+        /// <param name="y">The y position of the tile (i.e. row in the grid).</param>
+        /// <returns>True if the given point is within valid bounds and is empty.</returns>
+        public bool IsTileEmpty(int x, int y)
+        {
+            if (IsWithinLevelBounds(x, y))
+            {
+                return (tileGrid[y, x] == null);
+            }
+            else
+                return false;
+        }
+
+        /// <summary>
+        /// Returns whether the tile at the given grid coordinates is out of bounds.
+        /// </summary>
+        /// <param name="x">The x position of the tile (i.e. column in the grid).</param>
+        /// <param name="y">The y position of the tile (i.e. row in the grid).</param>
+        /// <returns>True if the coordinates are within the valid bounds.</returns>
         public bool IsWithinLevelBounds(int x, int y)
         {
             if (x.IsBetween(0, Width - 1) && y.IsBetween(0, Height - 1))
