@@ -452,7 +452,7 @@ namespace Broken_Shadows
             {
                 if (tileGrid[y, x] == null)
                     return false;
-                return !tileGrid[y, x].AllowsMovement && tileGrid[y, x].Neighbors.Exists(n => n.GetTile.AllowsMovement);
+                return !tileGrid[y, x].AllowsMovement;
             }
             else
                 return false;
