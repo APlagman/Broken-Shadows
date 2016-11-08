@@ -1,0 +1,6 @@
+{
+  "name": "Broken Shadows",
+  "tagline": "2D Tile-Based Puzzle Platformer",
+  "body": "### What is Broken Shadows?\r\nBroken Shadows is a puzzle platformer centered around the idea of visibility and manipulating (you guessed it) light. In its later stages, the game will feature non-linear exploration, hazards to avoid, enemies to defeat, and various ways with which to beat an area. The game comes with a built-in map editor to create custom levels.\r\n\r\n### Feature Progression\r\n- ~~Tile Manipulation~~ _Done!_\r\n- ~~Visibility~~ _Done!_\r\n- ~~Map Editor~~ _Done!_\r\n- Custom Level Saving/Loading\r\n- Hazards\r\n- Enemies\r\n- Exploration\r\n\r\n### Authors and Contributors\r\nGame Developer - @APlagman\r\n\r\n### Contact\r\nFor professional inquiries, please contact me [here](mailto:alexplagman@gmail.com).\r\n\r\nOtherwise, please feel free to visit [my website](http://www.alexplagman.com) for more of my information and work!",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
