@@ -5,25 +5,63 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Broken_Shadows.Objects
 {
+    public enum Direction
+    {
+        North,
+        NorthEast,
+        East,
+        SouthEast,
+        South,
+        SouthWest,
+        West,
+        NorthWest,
+        None
+    }
+
+    public enum TileType
+    {
+        Empty,
+        Path,
+        Wall,
+        Spawn,
+        Goal,
+        MoveablePath,
+        MoveablePath2,
+        NUM_TILE_TYPES
+    }
+
     public class Tile : GameObject
     {
         private string selectName = "Tiles/Highlight";
         private static Texture2D selectTexture;
-        private Level.TileType type;
+        private TileType type;
 
-        public bool AllowsMovement { get; }
-        public bool IsInteractable { get; }
-        public bool IsSpawn { get; }
-        public bool IsGoal { get; }
-        public bool IsRigid { get; }
+        private Level level;
+
+        // Properties for tiles which generally shouldn't change.\
+        // Can the player enter the tile?
+        public bool AllowsMovement { get; private set; }
+        // Can the player interact with the tile?
+        public bool IsInteractable { get; private set; }
+        // Will the player spawn on this tile?
+        public bool IsSpawn { get; private set; }
+        // Is this tile the end of a map?
+        public bool IsGoal { get; private set; }
+        // Is this tile moveable by the player?
+        public bool IsRigid { get; private set; }
+
+        // Properties for tiles which may change.
         public bool IsMoving { get; set; } = false;
         public bool IsSelected { get; set; }
+
+        // Used if the tile contains a light.
         public Graphics.PointLight Light { get; set; }
         public bool RecalculateLights { get; set; }
-        public Point GridCoordinates { get; set; }
-        public List<NeighborTile> Neighbors { get; } = new List<NeighborTile>();
 
-        public Tile(Game game, Pose2D pose, Level.TileType type, string textureName = "Tiles/Default", bool isSpawn = false, bool movementAllowed = false, bool isGoal = false, bool isRigid = true, bool canInteract = false, bool selected = false)
+        // Every tile has neighbors and coordinates.
+        public Point GridCoordinates { get; set; }
+
+        public Tile(Game game, Pose2D pose, TileType type, Level level, string textureName = "Tiles/Default", bool isSpawn = false, bool movementAllowed = false, bool isGoal = false, bool isRigid = true, bool canInteract = false, bool selected = false)
             : base(game, textureName, pose)
         {
             IsInteractable = canInteract;
@@ -33,11 +71,12 @@ namespace Broken_Shadows.Objects
             IsRigid = isRigid;
             IsSelected = selected;
 
+            this.level = level;
             this.type = type;
             TextureName = textureName;
 
             Load();
-            if (isSpawn)
+            if (isSpawn) // TODO: Remove hardcoded spawn/goal light colors.
                 Light = new Graphics.PointLight(Graphics.GraphicsManager.Get().LightEffect, Pose.Position, 150f, Color.Green, 0.5f);
             else if (isGoal)
                 Light = new Graphics.PointLight(Graphics.GraphicsManager.Get().LightEffect, Pose.Position, 100f, Color.Red, 0.5f);
@@ -51,7 +90,6 @@ namespace Broken_Shadows.Objects
                 if (RecalculateLights)
                 {
                     Light.Recalculate = true;
-                    //System.Diagnostics.Debug.WriteLine("Refreshed occluders for tile light at " + Light.Position);
                 }
             }
             RecalculateLights = false;
@@ -83,9 +121,9 @@ namespace Broken_Shadows.Objects
             selectTexture = Game.Content.Load<Texture2D>(selectName);
         }
 
-        public void AddNeighbor(Tile t, Direction direction)
+        public Tile GetNeighbor(Direction direction)
         {
-            Neighbors.Add(new NeighborTile(t, direction));
+            return level.GetTileAt(GridCoordinates.Add(direction.ToVector2()));
         }
 
         public int ToData()
@@ -106,12 +144,25 @@ namespace Broken_Shadows.Objects
             }
         }
 
-        public bool CanMove(Vector2 dir)
+        /// <summary>
+        /// Determines whether the tile can move in the given direction.
+        /// </summary>
+        /// <param name="vDir">The vector representation of the direction to check.</param>
+        /// <param name="endImmediately">Whether to end the check immediately or check non-rigid neighbors recursively.</param>
+        /// <returns></returns>
+        public bool CanMove(Vector2 vDir, bool endImmediately = false)
         {
             if (IsRigid) return false;
+            if (vDir == Vector2.Zero) return false;
 
-            return Neighbors.FindAll(n => dir.ToAdjacentDirections().Contains(n.Direction)).Count 
-                == Neighbors.FindAll(n => dir.ToAdjacentDirections().Contains(n.Direction) && n.GetTile.AllowsMovement).Count;
+            foreach (Direction d in vDir.ToAdjacentDirections())
+            {
+                Tile neighbor = GetNeighbor(d); 
+                // Tiles can only move into non-occupied space and cannot clip through tiles diagonally.
+                if (neighbor != null && (neighbor.IsRigid == true || endImmediately == true || neighbor.CanMove(d.ToVector2()) == false))
+                    return false;
+            }
+            return true;
         }
     }
 }

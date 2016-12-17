@@ -12,7 +12,7 @@ namespace Broken_Shadows
         {
             Graphics.GraphicsManager.Get().Start(this);
             IsMouseVisible = false;
-            IsFixedTimeStep = GlobalDefines.FpsCap;
+            IsFixedTimeStep = GlobalDefines.UseFpsCap;
             if (IsFixedTimeStep)
                 TargetElapsedTime = new TimeSpan(0, 0, 0, 0, 1000 / GlobalDefines.MaxGameFps);
             Content.RootDirectory = "Content";

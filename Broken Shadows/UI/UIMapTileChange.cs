@@ -67,7 +67,7 @@ namespace Broken_Shadows.UI
             {
                 Vector2 tempOrigin = new Vector2(selectedTiles[t].OriginPosition.X, selectedTiles[t].OriginPosition.Y);
                 Pose2D tempPose = new Pose2D(selectedTiles[t].Pose.Position);
-                Tile newTile = Level.CreateTile(selectedTiles[t].Game, Vector2.Zero, (Level.TileType)data, true);
+                Tile newTile = Level.CreateTile(selectedTiles[t].Game, Vector2.Zero, null, (TileType)data, true);
 
                 if (newTile != null)
                 {
@@ -106,7 +106,7 @@ namespace Broken_Shadows.UI
             vOffset.Y += 50;
             DrawCenteredString(drawBatch, data.ToString(), buttonFont, Color.White, vOffset);
             
-            Tile preview = new Tile(selectedTiles[0].Game, new Pose2D(new Vector2(g.Width + 96, g.Height + 16)), (Level.TileType)data, Tile.ToTexture(data));
+            Tile preview = new Tile(selectedTiles[0].Game, new Pose2D(new Vector2(g.Width + 96, g.Height + 16)), (TileType)data, null, Tile.ToTexture(data));
             preview.Draw(drawBatch, 0, preview.Pose.Position, 0.5f, SpriteEffects.None, 0);
 
             vOffset.Y += 100;

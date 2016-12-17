@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Broken_Shadows.Objects;
+using System;
 
 namespace Broken_Shadows
 {
@@ -11,41 +12,78 @@ namespace Broken_Shadows
             return dir == Direction.SouthWest || dir == Direction.NorthWest || dir == Direction.SouthEast || dir == Direction.NorthEast;
         }
 
-        public static Direction ToDirection(this Vector2 dir)
+        public static Direction ToDirection(this Vector2 vDir)
         {
-            if (dir.X == 0 && dir.Y == 1)
+            if (vDir.X == 0 && vDir.Y == 1)
             {
                 return Direction.South;
             }
-            if (dir.X == 0 && dir.Y == -1)
+            if (vDir.X == 0 && vDir.Y == -1)
             {
                 return Direction.North;
             }
-            if (dir.X == 1 && dir.Y == 1)
+            if (vDir.X == 1 && vDir.Y == 1)
             {
                 return Direction.SouthEast;
             }
-            if (dir.X == 1 && dir.Y == 0)
+            if (vDir.X == 1 && vDir.Y == 0)
             {
                 return Direction.East;
             }
-            if (dir.X == 1 && dir.Y == -1)
+            if (vDir.X == 1 && vDir.Y == -1)
             {
                 return Direction.NorthEast;
             }
-            if (dir.X == -1 && dir.Y == 1)
+            if (vDir.X == -1 && vDir.Y == 1)
             {
                 return Direction.SouthWest;
             }
-            if (dir.X == -1 && dir.Y == 0)
+            if (vDir.X == -1 && vDir.Y == 0)
             {
                 return Direction.West;
             }
-            if (dir.X == -1 && dir.Y == -1)
+            if (vDir.X == -1 && vDir.Y == -1)
             {
                 return Direction.NorthWest;
             }
             return Direction.None;
+        }
+
+        public static List<Direction> ToAdjacentDirections(this Vector2 vDir)
+        {
+            if (vDir.X == 0 && vDir.Y == 1)
+            {
+                return new List<Direction> { Direction.South };
+            }
+            if (vDir.X == 0 && vDir.Y == -1)
+            {
+                return new List<Direction> { Direction.North };
+            }
+            if (vDir.X == 1 && vDir.Y == 1)
+            {
+                return new List<Direction> { Direction.South, Direction.East, Direction.SouthEast };
+            }
+            if (vDir.X == 1 && vDir.Y == 0)
+            {
+                return new List<Direction> { Direction.East };
+            }
+            if (vDir.X == 1 && vDir.Y == -1)
+            {
+                return new List<Direction> { Direction.North, Direction.East, Direction.NorthEast };
+            }
+            if (vDir.X == -1 && vDir.Y == 1)
+            {
+                return new List<Direction> { Direction.South, Direction.West, Direction.SouthWest };
+            }
+            if (vDir.X == -1 && vDir.Y == 0)
+            {
+                return new List<Direction> { Direction.West };
+            }
+            if (vDir.X == -1 && vDir.Y == -1)
+            {
+                return new List<Direction> { Direction.North, Direction.West, Direction.NorthWest };
+            }
+            return new List<Direction> { Direction.None };
         }
 
         public static Vector2 ToVector2(this Direction direction)
@@ -89,6 +127,11 @@ namespace Broken_Shadows
             return new Vector2(x, y);
         }
 
+        public static Point Add(this Point point, Vector2 toAdd)
+        {
+            return new Point(point.X + (int)toAdd.X, point.Y + (int)toAdd.Y);
+        }
+
         /// <summary>
         /// Returns whether the given int is between two values, inclusive.
         /// </summary>
@@ -99,43 +142,6 @@ namespace Broken_Shadows
         public static bool IsBetween(this int x, int l, int r)
         {
             return (x >= l && x <= r);
-        }
-
-        public static List<Direction> ToAdjacentDirections(this Vector2 dir)
-        {
-            if (dir.X == 0 && dir.Y == 1)
-            {
-                return new List<Direction> { Direction.South };
-            }
-            if (dir.X == 0 && dir.Y == -1)
-            {
-                return new List<Direction> { Direction.North };
-            }
-            if (dir.X == 1 && dir.Y == 1)
-            {
-                return new List<Direction> { Direction.South, Direction.East, Direction.SouthEast };
-            }
-            if (dir.X == 1 && dir.Y == 0)
-            {
-                return new List<Direction> { Direction.East };
-            }
-            if (dir.X == 1 && dir.Y == -1)
-            {
-                return new List<Direction> { Direction.North, Direction.East, Direction.NorthEast };
-            }
-            if (dir.X == -1 && dir.Y == 1)
-            {
-                return new List<Direction> { Direction.South, Direction.West, Direction.SouthWest };
-            }
-            if (dir.X == -1 && dir.Y == 0)
-            {
-                return new List<Direction> { Direction.West };
-            }
-            if (dir.X == -1 && dir.Y == -1)
-            {
-                return new List<Direction> { Direction.North, Direction.West, Direction.NorthWest };
-            }
-            return new List<Direction> { Direction.None }; 
         }
     }
 }

@@ -10,6 +10,7 @@ namespace Broken_Shadows.Objects
         public Tile CurrentTile { get; set; }
         public Graphics.PointLight Light { get; private set; }
         public bool RecalculateLights { get; set; }
+        public bool IsMoving { get; set; }
 
         public Player(Game game)
             : base(game, "Entities/Player", new Pose2D(), null)
@@ -24,12 +25,10 @@ namespace Broken_Shadows.Objects
         {
             if (Light != null)
             {
-                //System.Diagnostics.Debug.WriteLine("Player: " + Pose.Position + ", Light: " + Light.Position);
                 Light.Position = Pose.Position;
                 if (RecalculateLights)
                 {
                     Light.Recalculate = true;
-                    //System.Diagnostics.Debug.WriteLine("Refreshed occluders for player light at " + Light.Position);
                 }
             }
             RecalculateLights = false;
@@ -50,31 +49,17 @@ namespace Broken_Shadows.Objects
         /// <returns>True if the player can move to its neighbor.</returns>
         public bool HasLegalNeighbor(Vector2 dir)
         {
-            Direction checkDir = dir.ToDirection();
+            if (CurrentTile.CanMove(dir))
+                return true;
 
-            if (CurrentTile.IsRigid)
+            foreach (Direction d in dir.ToAdjacentDirections())
             {
-                if (checkDir.IsDiagonal())
-                {
-                    List<Direction> adjDirections = dir.ToAdjacentDirections();
-                    List<NeighborTile> neighbors = CurrentTile.Neighbors.FindAll(n => adjDirections.Contains(n.Direction));
-
-                    return neighbors.Exists(n => n.Direction == checkDir)
-                        && !neighbors.SingleOrDefault(n => n.Direction == checkDir).GetTile.CanMove(dir)
-                        && neighbors.FindAll(n => n.GetTile.AllowsMovement).Count == neighbors.Count;
-                }
-                else
-                {
-                    NeighborTile neighbor = CurrentTile.Neighbors.SingleOrDefault(n => n.Direction == checkDir);
-                    if (neighbor != null)
-                        return neighbor.GetTile.AllowsMovement;
+                Tile neighbor = CurrentTile.GetNeighbor(d);
+                if (neighbor == null || neighbor.CanMove(dir) == true || neighbor.AllowsMovement == false)
                     return false;
-                }
             }
-            else
-            {
-                return CurrentTile.CanMove(dir);
-            }
+
+            return true;
         }
     }
 }

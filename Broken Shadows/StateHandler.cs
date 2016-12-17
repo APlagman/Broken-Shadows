@@ -241,7 +241,7 @@ namespace Broken_Shadows
                 updatePlayerLights = true;
                 if (checkTiles && players.First().HasLegalNeighbor(playerDir))
                 {
-                    //System.Diagnostics.Debug.WriteLine("Player Starting Position: " + players.First().OriginPosition);
+                    players.First().IsMoving = true;
                     level.ShiftTiles(playerDir);
                 }
             }
@@ -272,7 +272,6 @@ namespace Broken_Shadows
                             t.Pose.Position -= playerDir * GlobalDefines.TileStepSize;
                         if (updateStaticLights && !t.RecalculateLights)
                         {
-                            //System.Diagnostics.Debug.WriteLine("Shifting: " + gridPos + " " + prevGridPos);
                             t.ShiftLights(gridPos - prevGridPos);
                         }
                     }
@@ -295,7 +294,7 @@ namespace Broken_Shadows
                 {
                     player.Pose.Position = player.CurrentTile.Pose.Position;
                 }
-                if (playerDir != Vector2.Zero && player.HasLegalNeighbor(playerDir) || player.CurrentTile.IsMoving)
+                if (player.IsMoving || player.CurrentTile.IsMoving)
                 {
                     //System.Diagnostics.Debug.WriteLine("Recalc lights - playerDir");
                     player.RecalculateLights = true;
@@ -307,6 +306,7 @@ namespace Broken_Shadows
                     {
                         //System.Diagnostics.Debug.WriteLine("Player Ending Position: " + players.First().OriginPosition);
                         player.CurrentTile = level.Intersects(player.Pose.Position.ToPoint());
+                        player.IsMoving = false;
                     }
                 }
                 else if (prevDir != Vector2.Zero && playerDir == Vector2.Zero)
@@ -320,7 +320,7 @@ namespace Broken_Shadows
                     LoadLevel(true);
                     return;
                 }
-                if (updatePlayerLights && !player.RecalculateLights && player.HasLegalNeighbor(playerDir))
+                if (updatePlayerLights && !player.RecalculateLights && player.IsMoving)
                 {
                     player.ShiftLights(playerDir * GlobalDefines.TileStepSize);
                 }

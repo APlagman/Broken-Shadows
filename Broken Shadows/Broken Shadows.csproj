@@ -71,7 +71,6 @@
     <Compile Include="Localization.cs" />
     <Compile Include="Objects\GameObject.cs" />
     <Compile Include="Graphics\PointLight.cs" />
-    <Compile Include="Objects\NeighborTile.cs" />
     <Compile Include="Objects\Player.cs" />
     <Compile Include="Objects\Tile.cs" />
     <Compile Include="Patterns\Singleton.cs" />
