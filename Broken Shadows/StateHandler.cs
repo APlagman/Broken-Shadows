@@ -497,7 +497,7 @@ namespace Broken_Shadows
             }
         }
 
-        public void MouseClick(Point Position)
+        public void MouseHeld(Point Position)
         {
             if (state == GameState.Creator && !paused)
             {
@@ -505,6 +505,10 @@ namespace Broken_Shadows
                 Rectangle selectionBounds = InputManager.Get().CalculateSelectionBounds();
                 currentTiles = level.Intersects(selectionBounds);
             }
+        }
+
+        public void MouseClick(Point Position)
+        {
         }
 
         /// <summary>

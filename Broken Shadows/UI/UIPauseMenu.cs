@@ -45,6 +45,7 @@ namespace Broken_Shadows.UI
         public void Quit()
         {
             StateHandler.Get().SetState(GameState.MainMenu);
+            OnExit();
             //SoundManager.Get().PlaySoundCue("MenuClick");
         }
 

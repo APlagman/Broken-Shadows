@@ -125,6 +125,11 @@ namespace Broken_Shadows
             {
                 mouseDownPos = curMouse.Position;
             }
+            // Check for hold
+            if (curMouse.LeftButton == ButtonState.Pressed)
+            {
+                StateHandler.Get().MouseHeld(mousePos);
+            }
             // Check for release
             if (prevMouse.LeftButton == ButtonState.Pressed && curMouse.LeftButton == ButtonState.Released)
             {
@@ -205,8 +210,18 @@ namespace Broken_Shadows
 
         public Rectangle CalculateSelectionBounds()
         {
-            int deltaX = mouseUpPos.X - mouseDownPos.X;
-            int deltaY = mouseUpPos.Y - mouseDownPos.Y;
+            int deltaX, deltaY;
+            if (Mouse.GetState().LeftButton == ButtonState.Pressed)
+            {
+
+                deltaX = mousePos.X - mouseDownPos.X;
+                deltaY = mousePos.Y - mouseDownPos.Y;
+            }
+            else
+            {
+                deltaX = mouseUpPos.X - mouseDownPos.X;
+                deltaY = mouseUpPos.Y - mouseDownPos.Y;
+            }
             int width = Math.Abs(deltaX);
             int height = Math.Abs(deltaY);
 
